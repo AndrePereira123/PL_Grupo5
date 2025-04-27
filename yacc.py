@@ -1,4 +1,4 @@
-from Analisar_lex import lexer
+from lex import lexer
 
 prox_simb = ('Erro', '', 0, 0)
 

@@ -1,4 +1,5 @@
 import ply.lex as lex
+import re
 
 error_count = 0  # Contador de erros
 
@@ -27,15 +28,35 @@ tokens = (
     'NE',
     'IDENTIFIER',
     'STRING',
-    'KEYWORD'
+    'PROGRAM',
+    'BEGIN',
+    'END',
+    'VAR',
+    'INTEGER',
+    'REAL',
+    'BOOLEAN',
+    'IF',
+    'THEN',
+    'ELSE',
+    'WHILE',
+    'DO',
+    'FOR',
+    'TO',
+    'DOWNTO',
+    'FUNCTION',
+    'PROCEDURE',
+    'ARRAY',
+    'OF',
+    'WRITE',
+    'WRITELN',
+    'READ',
+    'READLN',
+    'TRUE',
+    'FALSE',
+    'AND',
+    'OR',
+    'NOT'
 )
-
-# Palavras-chave de Pascal
-keywords = {
-    'program', 'begin', 'end', 'var', 'integer', 'real', 'boolean', 'if', 'then', 'else',
-    'while', 'do', 'for', 'to', 'downto', 'function', 'procedure', 'array', 'of', 'write',
-    'writeln', 'read', 'readln', 'true', 'false'
-}
 
 # Regras para tokens simples
 t_PLUS = r'\+'
@@ -58,6 +79,151 @@ t_LE = r'<='
 t_GE = r'>='
 t_NE = r'<>'
 
+def t_PROGRAM(t):
+    r'program'
+    t.type = 'PROGRAM'
+    return t
+
+def t_BEGIN(t):
+    r'begin'
+    t.type = 'BEGIN'
+    return t
+
+def t_END(t):
+    r'end\.'
+    t.type = 'END'
+    return t
+
+def t_VAR(t):
+    r'var'
+    t.type = 'VAR'
+    return t
+
+def t_INTEGER(t):
+    r'integer'
+    t.type = 'INTEGER'
+    return t
+
+def t_REAL(t):
+    r'real'
+    t.type = 'REAL'
+    return t
+
+def t_BOOLEAN(t):
+    r'boolean'
+    t.type = 'BOOLEAN'
+    return t
+
+def t_IF(t):
+    r'if'
+    t.type = 'IF'
+    return t
+
+def t_THEN(t):
+    r'then'
+    t.type = 'THEN'
+    return t
+
+def t_ELSE(t):
+    r'else'
+    t.type = 'ELSE'
+    return t
+
+def t_WHILE(t):
+    r'while'
+    t.type = 'WHILE'
+    return t
+
+def t_DO(t):
+    r'do'
+    t.type = 'DO'
+    return t
+
+def t_FOR(t):
+    r'for'
+    t.type = 'FOR'
+    return t
+
+def t_TO(t):
+    r'to'
+    t.type = 'TO'
+    return t
+
+def t_DOWNTO(t):
+    r'downto'
+    t.type = 'DOWNTO'
+    return t
+
+def t_FUNCTION(t):
+    r'function'
+    t.type = 'FUNCTION'
+    return t
+
+def t_PROCEDURE(t):
+    r'procedure'
+    t.type = 'PROCEDURE'
+    return t
+
+def t_ARRAY(t):
+    r'array'
+    t.type = 'ARRAY'
+    return t
+
+def t_OF(t):
+    r'of'
+    t.type = 'OF'
+    return t
+
+def t_WRITELN(t):
+    r'writeln'
+    t.type = 'WRITELN'
+    return t
+
+def t_WRITE(t):
+    r'write'
+    t.type = 'WRITE'
+    return t
+
+def t_READLN(t):
+    r'readln'
+    t.type = 'READLN'
+    return t
+
+def t_READ(t):
+    r'read'
+    t.type = 'READ'
+    return t
+
+def t_TRUE(t):
+    r'true'
+    t.type = 'TRUE'
+    return t
+
+def t_FALSE(t):
+    r'false'
+    t.type = 'FALSE'
+    return t
+
+def t_AND(t):
+    r'and'
+    t.type = 'AND'
+    return t
+
+def t_OR(t):
+    r'or'
+    t.type = 'OR'
+    return t
+
+def t_NOT(t):
+    r'not'
+    t.type = 'NOT'
+    return t
+
+def t_IDENTIFIER(t):
+    r'[a-zA-Z][a-zA-Z0-9_]*'
+    t.type = 'IDENTIFIER'
+    return t
+
 # Comentários
 def t_COMMENT(t):
     r'\{[^}]*\}|\(\*[^*]*\*\)'
@@ -71,15 +237,8 @@ def t_STRING(t):
 
 # Números
 def t_NUMBER(t):
-    r'\d+'
+    r'[+|-]?\d+'
     t.value = int(t.value)
-    return t
-
-# Identificadores e palavras-chave
-def t_IDENTIFIER(t):
-    r'[a-zA-Z_][a-zA-Z_0-9]*'
-    if t.value.lower() in keywords:
-        t.type = 'KEYWORD'
     return t
 
 # Nova linha
@@ -98,7 +257,7 @@ def t_error(t):
     t.lexer.skip(1)
 
 # Construir o lexer
-lexer = lex.lex()
+lexer = lex.lex(reflags=re.IGNORECASE)
 
 # Testar o lexer com um exemplo de código Pascal
 if __name__ == "__main__":
