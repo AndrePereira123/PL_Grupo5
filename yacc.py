@@ -1,169 +1,232 @@
-from lex import lexer
+from lex import tokens
+import ply.yacc as yacc
 
-prox_simb = ('Erro', '', 0, 0)
 
-def parserError(simb):
-    print(f"Erro sintático, token inesperado: {simb}")
-    exit(1)
+variaveis = {} ## chave : nome da variavel, valor : (tipo da variavel,index)
+index = 0 ## index na maquina virtual
+nivel_apontador = 0
+## index = valor na maquina virtual 
 
-def rec_term(simb):
-    global prox_simb
-    if prox_simb and prox_simb.type == simb:
-        prox_simb = lexer.token()
+def p_file(p):
+    'file : PROGRAM name vars code'
+    if p[3] is not None:
+        p[0] = p[3] + p[4]
     else:
-        parserError(prox_simb)
+        p[0] = p[4]
+    print(f"File: {p[0]}")
 
-def rec_var_declaration():
-    global prox_simb
-    if prox_simb.type == 'KEYWORD' and prox_simb.value == 'var':
-        rec_term('KEYWORD')  # Reconhece 'var'
-        while prox_simb.type == 'IDENTIFIER':
-            # Reconhece uma lista de variáveis separadas por vírgulas
-            while prox_simb.type == 'IDENTIFIER':
-                rec_term('IDENTIFIER')  # Nome da variável
-                if prox_simb.type == 'COMMA':  # Vírgula entre variáveis
-                    rec_term('COMMA')
-                else:
-                    break
-            rec_term('COLON')  # ':'
-            if prox_simb.type == 'KEYWORD' and prox_simb.value in ['integer', 'real', 'boolean', 'string']:
-                rec_term('KEYWORD')  # Tipo da variável
-            else:
-                parserError(prox_simb)
-            rec_term('SEMICOLON')  # ';'
-        print("Reconheci: Declaração de Variáveis")
+def p_name(p):
+    'name : IDENTIFIER SEMICOLON'
+    p[0] = p[1]
+    print(f"Name: {p[0]}")
+
+################################ variaveis ##########################################
+def p_vars(p):
+    '''vars : VAR varstail
+           | empty'''
+    if len(p) == 3:
+        p[0] = p[2]
     else:
-        parserError(prox_simb)
+        p[0] = None
+    
+    print(f"Vars:")
+    for key,val in variaveis.items():
+        print(f"  {key}: {val}")
 
-def rec_program():
-    global prox_simb
-    if prox_simb.type == 'KEYWORD' and prox_simb.value == 'program':
-        rec_term('KEYWORD')
-        rec_term('IDENTIFIER')
-        rec_term('SEMICOLON')
-        if prox_simb.type == 'KEYWORD' and prox_simb.value == 'var':
-            rec_var_declaration()  # Adiciona suporte para a seção 'var'
-        rec_block()
-        rec_term('DOT')
-        print("Reconheci: Program")
-    else:
-        parserError(prox_simb)
-
-def rec_block():
-    global prox_simb
-    if prox_simb.type == 'KEYWORD' and prox_simb.value == 'begin':
-        rec_term('KEYWORD')
-        rec_statements()
-        rec_term('KEYWORD')  # end
-        print("Reconheci: Block")
-    else:
-        parserError(prox_simb)
-
-def rec_statements():
-    global prox_simb
-    rec_statement()
-    while prox_simb and prox_simb.type == 'SEMICOLON':
-        rec_term('SEMICOLON')
-        rec_statement()
-    print("Reconheci: Statements")
-
-def rec_statement():
-    global prox_simb
-    if prox_simb.type == 'IDENTIFIER':
-        rec_term('IDENTIFIER')
-        rec_term('ASSIGN')
-        rec_expression()
-        print("Reconheci: Assignment")
-    elif prox_simb.type == 'KEYWORD' and prox_simb.value in ['write', 'writeln']:
-        rec_term('KEYWORD')
-        rec_term('LPAREN')
-        # Processa múltiplos argumentos separados por vírgulas
-        while True:
-            if prox_simb.type == 'STRING':  # Suporte para strings
-                rec_term('STRING')
-            else:
-                rec_expression()
-            if prox_simb.type == 'COMMA':  # Vírgula entre argumentos
-                rec_term('COMMA')
-            else:
-                break
-        rec_term('RPAREN')
-        print("Reconheci: Write")
-    elif prox_simb.type == 'KEYWORD' and prox_simb.value == 'if':
-        rec_term('KEYWORD')
-        rec_expression()
-        rec_term('KEYWORD')  # then
-        rec_statement()
-        if prox_simb.type == 'KEYWORD' and prox_simb.value == 'else':
-            rec_term('KEYWORD')
-            rec_statement()
-        print("Reconheci: If")
-    elif prox_simb.type == 'KEYWORD' and prox_simb.value == 'while':
-        rec_term('KEYWORD')
-        rec_expression()
-        rec_term('KEYWORD')  # do
-        rec_statement()
-        print("Reconheci: While")
-    elif prox_simb.type == 'KEYWORD' and prox_simb.value == 'for':
-        rec_term('KEYWORD')  # Reconhece 'for'
-        rec_term('IDENTIFIER')  # Variável de controle
-        rec_term('ASSIGN')  # ':='
-        rec_expression()  # Valor inicial
-        if prox_simb.type == 'KEYWORD' and prox_simb.value in ['to', 'downto']:
-            rec_term('KEYWORD')  # Reconhece 'to' ou 'downto'
+def p_varstail(p):
+    '''varstail : vardecl varstail
+                | empty'''
+    if len(p) == 3:
+        if p[2] is not None:
+            p[0] = p[1] + p[2]
         else:
-            parserError(prox_simb)
-        rec_expression()  # Valor final
-        rec_term('KEYWORD')  # do
-        rec_statement()  # Corpo do loop
-        print("Reconheci: For")
-    elif prox_simb.type == 'KEYWORD' and prox_simb.value == 'begin':
-        rec_block()
+            p[0] = p[1]
     else:
-        print("Reconheci: Empty Statement")
+        p[0] = []
 
-def rec_expression():
-    global prox_simb
-    rec_term_expression()
-    while prox_simb and prox_simb.type in ['PLUS', 'MINUS', 'AND', 'OR']:
-        rec_term(prox_simb.type)  # Reconhece operadores como +, -, AND, OR
-        rec_term_expression()
-    print("Reconheci: Expression")
+    
 
-def rec_term_expression():
-    global prox_simb
-    rec_factor()
-    while prox_simb and prox_simb.type in ['TIMES', 'DIVIDE', 'MOD']:
-        rec_term(prox_simb.type)  # Reconhece operadores como *, /, MOD
-        rec_factor()
-    print("Reconheci: Term")
+def p_vardecl(p):
+    'vardecl : idlist COLON type SEMICOLON'
+    global variaveis, index, nivel_apontador
+    p[0] = []
+    for var in p[1]:
+        variaveis[var] = (p[3].lower(),index) ## registar no dicionario cada variavel 
+        index += 1 
+        p[3] = p[3].lower()
+        if p[3] == 'integer' or p[3] == 'boolean':
+            p[0] += ["PUSHI 0\n"]
 
-def rec_factor():
-    global prox_simb
-    if prox_simb.type == 'NUMBER':
-        rec_term('NUMBER')
-        print("Reconheci: Number")
-    elif prox_simb.type == 'IDENTIFIER':
-        rec_term('IDENTIFIER')
-        print("Reconheci: Identifier")
-    elif prox_simb.type == 'LPAREN':
-        rec_term('LPAREN')  # Reconhece '('
-        rec_expression()    # Processa a expressão dentro dos parênteses
-        rec_term('RPAREN')  # Reconhece ')'
-        print("Reconheci: Parenthesized Expression")
+        elif p[3] == 'real':
+            p[0] += f"PUSHF 0\n"
+
+        elif p[3] == 'string':
+            p[0] += f"PUSHS \"\"\n"
+
+        elif p[3] == 'array':
+            pass  ## TODO: array
+    
+    
+
+def p_idlist(p):
+    'idlist : IDENTIFIER idlistTail'
+    if p[2] is None:
+        p[0] = [p[1]]
     else:
-        parserError(prox_simb)
+        p[0] = [p[1]] + p[2]
+    
 
-def rec_Parser(data):
-    global prox_simb
-    lexer.input(data)
-    prox_simb = lexer.token()
-    rec_program()
-    if prox_simb and prox_simb.type != 'EOF':
-        parserError(prox_simb)
-    print("Parsing concluído com sucesso!")
+def p_idlistTail(p):
+    '''idlistTail : COMMA IDENTIFIER idlistTail
+           | empty'''
+    if len(p) == 4:
+        if p[3] is not None:
+            p[0] = [p[2]] + p[3]
+        else:
+            p[0] = [p[2]]
+    else:
+        p[0] = None
 
-# Entrada do usuário
-if __name__ == "__main__":
-    linha = input("Introduza o código Pascal: ")
-    rec_Parser(linha)
+
+def p_type(p):
+    '''type : TYPE_INTEGER
+           | TYPE_REAL
+           | BOOLEAN
+           | TYPE_STRING
+           | ARRAY LBRACKET INTEGER RBRACKET OF type'''
+    if len(p) == 2:  
+        p[0] = p[1]
+    else:  
+        p[0] = {'type': 'ARRAY', 'size': p[3], 'element_type': p[6]}
+
+############################## programa ##########################################
+def p_code(p):
+    'code : BEGIN expressions END'
+    p[0] = ["START\n"] + p[2] + ["STOP\n"]
+    print(f"Code: {p[0]}")
+
+def p_expressions(p):
+    '''expressions : statement expressions
+                   | empty'''
+    if len(p) == 3:
+        if p[2] is not None:
+            p[0] = p[1] + p[2]
+        else:
+            p[0] = p[1]
+    else:
+        p[0] = p[1] 
+
+
+#################################### statements ##########################################
+
+def p_statement(p):
+    '''statement : IDENTIFIER ASSIGN assign_expression SEMICOLON 
+                | WRITELN writeln_statement SEMICOLON
+                | WRITE write_statement SEMICOLON
+                | READLN 
+                | READ 
+                | IF            
+                | FOR 
+                | WHILE ''' ## TODO implementar os outros statements
+    if len(p) == 5:
+        type, var = p[3]
+        global variaveis, index, nivel_apontador
+        if variaveis.get(p[1]) is not None:  ##TODO nao suporta varaiveis dentro de arrays
+            tipo, index_var = variaveis[p[1]]   
+        if type.lower() != tipo:
+            raise TypeError(f"Tipo de dado inválido para atribuição: {tipo} para {p[1]}")   
+        if tipo == 'integer' :      
+            p[0] = ["PUSHI " + str(var) + "\n"] + ["STOREG " + str(index_var) + "\n"]
+        elif tipo == 'real':
+            p[0] = ["PUSHF " + str(var) + "\n"] + ["STOREG " + str(index_var) + "\n"]
+        elif tipo == 'string':
+            p[0] = ["PUSHS \"" + str(var) + "\"\n"] + ["STOREG " + str(index_var) + "\n"]
+        elif tipo == 'boolean':
+            ##TODO ajustar boleano para ser TRUE/FALSE
+            pass
+    else:
+        p[0] = p[2]    
+
+
+
+def p_writeln_statement(p):
+    'writeln_statement : LPAREN string_statement RPAREN'
+    p[0] = []
+    first_iteration = True
+    for arg in reversed(p[2]):
+        argtype = arg[0]
+        print(f"Argument: {arg}")
+        print(f"Argument type: {argtype}")
+
+        if argtype == 'STRING':
+            p[0] += ["PUSHS \"" + arg[1] + "\"\n"]
+        
+        elif argtype == 'IDENTIFIER':
+            global variaveis, index
+            if variaveis.get(arg[1]) is not None:  ##TODO nao suporta varaiveis dentro de arrays
+                tipo, index_var = variaveis[arg[1]]
+                profundidade = index_var - index
+                p[0] += ["PUSHFP\nLOAD " + str(profundidade) + "\n"]
+                if tipo == 'integer' or tipo == 'boolean':      ##TODO ajustar boleano para ser TRUE/FALSE
+                    p[0] += ["STRI\n"]
+                elif tipo == 'real':
+                    p[0] += ["STRF\n"]
+                    
+        elif argtype == 'INTEGER': ## TODO verificar ints ou reais
+            p[0] += ["PUSHI " + str(arg[1]) + "\nSTRI\n"]
+        elif argtype == 'REAL':
+            p[0] += ["PUSHF " + str(arg[1]) + "\nSTRF\n"]
+        elif argtype == 'expression':
+            p[0] += p[2]    
+        
+        if not first_iteration:
+            p[0] += ["CONCAT\n"]
+        else:
+            first_iteration = False
+    
+    p[0] += ["WRITES\nWRITELN\n"]
+
+def p_write_statement(p):
+    'write_statement : LPAREN string_statement RPAREN'
+    p[0] = p[2]
+
+def p_string_statement(p):
+    '''string_statement : assign_expression
+                        | assign_expression COMMA string_statement'''
+    if len(p) == 2:
+        p[0] = [p[1]]
+    else:
+        p[0] = [p[1]] + p[3]
+
+def p_assign_expression(p):
+    '''assign_expression : INTEGER
+                         | REAL
+                         | IDENTIFIER       
+                         | STRING
+                         | expression ''' ## TODO implementar expression e identifier
+    p[0] = (p.slice[1].type, p[1])
+
+def p_expression(p):
+    '''expression : empty'''
+    p[0] = p[1]
+
+
+##################################### assign_variable ##########################################
+
+
+
+def p_error(p):
+    print("Erro sintático no input!")
+
+def p_empty(p):
+    'empty :'
+    p[0] = None
+
+parser = yacc.yacc()
+
+with open('programas_pascal/hello_world.pas', 'r') as file:
+    data = file.read()
+    val = parser.parse(data)
+    with open('output.txt', 'w') as output_file:
+        for linha in val:
+            output_file.write(f"{linha}")

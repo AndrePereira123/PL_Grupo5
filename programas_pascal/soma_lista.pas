@@ -1,6 +1,6 @@
 program SomaArray;
 var
-    numeros: array[1..5] of integer;
+    numeros : array[1..5] of integer;
     i, soma: integer;
 begin
     soma := 0;

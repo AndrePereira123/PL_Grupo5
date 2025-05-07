@@ -1,0 +1,897 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Unused terminals:
+
+    AND
+    COMMENT
+    DIVIDE
+    DO
+    DOT
+    DOWNTO
+    ELSE
+    EQUAL
+    FALSE
+    FUNCTION
+    GE
+    GT
+    LE
+    LT
+    MINUS
+    NE
+    NOT
+    OR
+    PLUS
+    PROCEDURE
+    THEN
+    TIMES
+    TO
+    TRUE
+
+Grammar
+
+Rule 0     S' -> file
+Rule 1     file -> PROGRAM name vars code
+Rule 2     name -> IDENTIFIER SEMICOLON
+Rule 3     vars -> VAR varstail
+Rule 4     vars -> empty
+Rule 5     varstail -> vardecl varstail
+Rule 6     varstail -> empty
+Rule 7     vardecl -> idlist COLON type SEMICOLON
+Rule 8     idlist -> IDENTIFIER idlistTail
+Rule 9     idlistTail -> COMMA IDENTIFIER idlistTail
+Rule 10    idlistTail -> empty
+Rule 11    type -> TYPE_INTEGER
+Rule 12    type -> TYPE_REAL
+Rule 13    type -> BOOLEAN
+Rule 14    type -> TYPE_STRING
+Rule 15    type -> ARRAY LBRACKET INTEGER RBRACKET OF type
+Rule 16    code -> BEGIN expressions END
+Rule 17    expressions -> statement expressions
+Rule 18    expressions -> empty
+Rule 19    statement -> IDENTIFIER ASSIGN assign_expression SEMICOLON
+Rule 20    statement -> WRITELN writeln_statement SEMICOLON
+Rule 21    statement -> WRITE write_statement SEMICOLON
+Rule 22    statement -> READLN
+Rule 23    statement -> READ
+Rule 24    statement -> IF
+Rule 25    statement -> FOR
+Rule 26    statement -> WHILE
+Rule 27    writeln_statement -> LPAREN string_statement RPAREN
+Rule 28    write_statement -> LPAREN string_statement RPAREN
+Rule 29    string_statement -> assign_expression
+Rule 30    string_statement -> assign_expression COMMA string_statement
+Rule 31    assign_expression -> INTEGER
+Rule 32    assign_expression -> REAL
+Rule 33    assign_expression -> IDENTIFIER
+Rule 34    assign_expression -> STRING
+Rule 35    assign_expression -> expression
+Rule 36    expression -> empty
+Rule 37    empty -> <empty>
+
+Terminals, with rules where they appear
+
+AND                  : 
+ARRAY                : 15
+ASSIGN               : 19
+BEGIN                : 16
+BOOLEAN              : 13
+COLON                : 7
+COMMA                : 9 30
+COMMENT              : 
+DIVIDE               : 
+DO                   : 
+DOT                  : 
+DOWNTO               : 
+ELSE                 : 
+END                  : 16
+EQUAL                : 
+FALSE                : 
+FOR                  : 25
+FUNCTION             : 
+GE                   : 
+GT                   : 
+IDENTIFIER           : 2 8 9 19 33
+IF                   : 24
+INTEGER              : 15 31
+LBRACKET             : 15
+LE                   : 
+LPAREN               : 27 28
+LT                   : 
+MINUS                : 
+NE                   : 
+NOT                  : 
+OF                   : 15
+OR                   : 
+PLUS                 : 
+PROCEDURE            : 
+PROGRAM              : 1
+RBRACKET             : 15
+READ                 : 23
+READLN               : 22
+REAL                 : 32
+RPAREN               : 27 28
+SEMICOLON            : 2 7 19 20 21
+STRING               : 34
+THEN                 : 
+TIMES                : 
+TO                   : 
+TRUE                 : 
+TYPE_INTEGER         : 11
+TYPE_REAL            : 12
+TYPE_STRING          : 14
+VAR                  : 3
+WHILE                : 26
+WRITE                : 21
+WRITELN              : 20
+error                : 
+
+Nonterminals, with rules where they appear
+
+assign_expression    : 19 29 30
+code                 : 1
+empty                : 4 6 10 18 36
+expression           : 35
+expressions          : 16 17
+file                 : 0
+idlist               : 7
+idlistTail           : 8 9
+name                 : 1
+statement            : 17
+string_statement     : 27 28 30
+type                 : 7 15
+vardecl              : 5
+vars                 : 1
+varstail             : 3 5
+write_statement      : 21
+writeln_statement    : 20
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . file
+    (1) file -> . PROGRAM name vars code
+
+    PROGRAM         shift and go to state 2
+
+    file                           shift and go to state 1
+
+state 1
+
+    (0) S' -> file .
+
+
+
+state 2
+
+    (1) file -> PROGRAM . name vars code
+    (2) name -> . IDENTIFIER SEMICOLON
+
+    IDENTIFIER      shift and go to state 4
+
+    name                           shift and go to state 3
+
+state 3
+
+    (1) file -> PROGRAM name . vars code
+    (3) vars -> . VAR varstail
+    (4) vars -> . empty
+    (37) empty -> .
+
+    VAR             shift and go to state 6
+    BEGIN           reduce using rule 37 (empty -> .)
+
+    vars                           shift and go to state 5
+    empty                          shift and go to state 7
+
+state 4
+
+    (2) name -> IDENTIFIER . SEMICOLON
+
+    SEMICOLON       shift and go to state 8
+
+
+state 5
+
+    (1) file -> PROGRAM name vars . code
+    (16) code -> . BEGIN expressions END
+
+    BEGIN           shift and go to state 10
+
+    code                           shift and go to state 9
+
+state 6
+
+    (3) vars -> VAR . varstail
+    (5) varstail -> . vardecl varstail
+    (6) varstail -> . empty
+    (7) vardecl -> . idlist COLON type SEMICOLON
+    (37) empty -> .
+    (8) idlist -> . IDENTIFIER idlistTail
+
+    BEGIN           reduce using rule 37 (empty -> .)
+    IDENTIFIER      shift and go to state 15
+
+    varstail                       shift and go to state 11
+    vardecl                        shift and go to state 12
+    empty                          shift and go to state 13
+    idlist                         shift and go to state 14
+
+state 7
+
+    (4) vars -> empty .
+
+    BEGIN           reduce using rule 4 (vars -> empty .)
+
+
+state 8
+
+    (2) name -> IDENTIFIER SEMICOLON .
+
+    VAR             reduce using rule 2 (name -> IDENTIFIER SEMICOLON .)
+    BEGIN           reduce using rule 2 (name -> IDENTIFIER SEMICOLON .)
+
+
+state 9
+
+    (1) file -> PROGRAM name vars code .
+
+    $end            reduce using rule 1 (file -> PROGRAM name vars code .)
+
+
+state 10
+
+    (16) code -> BEGIN . expressions END
+    (17) expressions -> . statement expressions
+    (18) expressions -> . empty
+    (19) statement -> . IDENTIFIER ASSIGN assign_expression SEMICOLON
+    (20) statement -> . WRITELN writeln_statement SEMICOLON
+    (21) statement -> . WRITE write_statement SEMICOLON
+    (22) statement -> . READLN
+    (23) statement -> . READ
+    (24) statement -> . IF
+    (25) statement -> . FOR
+    (26) statement -> . WHILE
+    (37) empty -> .
+
+    IDENTIFIER      shift and go to state 19
+    WRITELN         shift and go to state 20
+    WRITE           shift and go to state 21
+    READLN          shift and go to state 22
+    READ            shift and go to state 23
+    IF              shift and go to state 24
+    FOR             shift and go to state 25
+    WHILE           shift and go to state 26
+    END             reduce using rule 37 (empty -> .)
+
+    expressions                    shift and go to state 16
+    statement                      shift and go to state 17
+    empty                          shift and go to state 18
+
+state 11
+
+    (3) vars -> VAR varstail .
+
+    BEGIN           reduce using rule 3 (vars -> VAR varstail .)
+
+
+state 12
+
+    (5) varstail -> vardecl . varstail
+    (5) varstail -> . vardecl varstail
+    (6) varstail -> . empty
+    (7) vardecl -> . idlist COLON type SEMICOLON
+    (37) empty -> .
+    (8) idlist -> . IDENTIFIER idlistTail
+
+    BEGIN           reduce using rule 37 (empty -> .)
+    IDENTIFIER      shift and go to state 15
+
+    vardecl                        shift and go to state 12
+    varstail                       shift and go to state 27
+    empty                          shift and go to state 13
+    idlist                         shift and go to state 14
+
+state 13
+
+    (6) varstail -> empty .
+
+    BEGIN           reduce using rule 6 (varstail -> empty .)
+
+
+state 14
+
+    (7) vardecl -> idlist . COLON type SEMICOLON
+
+    COLON           shift and go to state 28
+
+
+state 15
+
+    (8) idlist -> IDENTIFIER . idlistTail
+    (9) idlistTail -> . COMMA IDENTIFIER idlistTail
+    (10) idlistTail -> . empty
+    (37) empty -> .
+
+    COMMA           shift and go to state 30
+    COLON           reduce using rule 37 (empty -> .)
+
+    idlistTail                     shift and go to state 29
+    empty                          shift and go to state 31
+
+state 16
+
+    (16) code -> BEGIN expressions . END
+
+    END             shift and go to state 32
+
+
+state 17
+
+    (17) expressions -> statement . expressions
+    (17) expressions -> . statement expressions
+    (18) expressions -> . empty
+    (19) statement -> . IDENTIFIER ASSIGN assign_expression SEMICOLON
+    (20) statement -> . WRITELN writeln_statement SEMICOLON
+    (21) statement -> . WRITE write_statement SEMICOLON
+    (22) statement -> . READLN
+    (23) statement -> . READ
+    (24) statement -> . IF
+    (25) statement -> . FOR
+    (26) statement -> . WHILE
+    (37) empty -> .
+
+    IDENTIFIER      shift and go to state 19
+    WRITELN         shift and go to state 20
+    WRITE           shift and go to state 21
+    READLN          shift and go to state 22
+    READ            shift and go to state 23
+    IF              shift and go to state 24
+    FOR             shift and go to state 25
+    WHILE           shift and go to state 26
+    END             reduce using rule 37 (empty -> .)
+
+    statement                      shift and go to state 17
+    expressions                    shift and go to state 33
+    empty                          shift and go to state 18
+
+state 18
+
+    (18) expressions -> empty .
+
+    END             reduce using rule 18 (expressions -> empty .)
+
+
+state 19
+
+    (19) statement -> IDENTIFIER . ASSIGN assign_expression SEMICOLON
+
+    ASSIGN          shift and go to state 34
+
+
+state 20
+
+    (20) statement -> WRITELN . writeln_statement SEMICOLON
+    (27) writeln_statement -> . LPAREN string_statement RPAREN
+
+    LPAREN          shift and go to state 36
+
+    writeln_statement              shift and go to state 35
+
+state 21
+
+    (21) statement -> WRITE . write_statement SEMICOLON
+    (28) write_statement -> . LPAREN string_statement RPAREN
+
+    LPAREN          shift and go to state 38
+
+    write_statement                shift and go to state 37
+
+state 22
+
+    (22) statement -> READLN .
+
+    IDENTIFIER      reduce using rule 22 (statement -> READLN .)
+    WRITELN         reduce using rule 22 (statement -> READLN .)
+    WRITE           reduce using rule 22 (statement -> READLN .)
+    READLN          reduce using rule 22 (statement -> READLN .)
+    READ            reduce using rule 22 (statement -> READLN .)
+    IF              reduce using rule 22 (statement -> READLN .)
+    FOR             reduce using rule 22 (statement -> READLN .)
+    WHILE           reduce using rule 22 (statement -> READLN .)
+    END             reduce using rule 22 (statement -> READLN .)
+
+
+state 23
+
+    (23) statement -> READ .
+
+    IDENTIFIER      reduce using rule 23 (statement -> READ .)
+    WRITELN         reduce using rule 23 (statement -> READ .)
+    WRITE           reduce using rule 23 (statement -> READ .)
+    READLN          reduce using rule 23 (statement -> READ .)
+    READ            reduce using rule 23 (statement -> READ .)
+    IF              reduce using rule 23 (statement -> READ .)
+    FOR             reduce using rule 23 (statement -> READ .)
+    WHILE           reduce using rule 23 (statement -> READ .)
+    END             reduce using rule 23 (statement -> READ .)
+
+
+state 24
+
+    (24) statement -> IF .
+
+    IDENTIFIER      reduce using rule 24 (statement -> IF .)
+    WRITELN         reduce using rule 24 (statement -> IF .)
+    WRITE           reduce using rule 24 (statement -> IF .)
+    READLN          reduce using rule 24 (statement -> IF .)
+    READ            reduce using rule 24 (statement -> IF .)
+    IF              reduce using rule 24 (statement -> IF .)
+    FOR             reduce using rule 24 (statement -> IF .)
+    WHILE           reduce using rule 24 (statement -> IF .)
+    END             reduce using rule 24 (statement -> IF .)
+
+
+state 25
+
+    (25) statement -> FOR .
+
+    IDENTIFIER      reduce using rule 25 (statement -> FOR .)
+    WRITELN         reduce using rule 25 (statement -> FOR .)
+    WRITE           reduce using rule 25 (statement -> FOR .)
+    READLN          reduce using rule 25 (statement -> FOR .)
+    READ            reduce using rule 25 (statement -> FOR .)
+    IF              reduce using rule 25 (statement -> FOR .)
+    FOR             reduce using rule 25 (statement -> FOR .)
+    WHILE           reduce using rule 25 (statement -> FOR .)
+    END             reduce using rule 25 (statement -> FOR .)
+
+
+state 26
+
+    (26) statement -> WHILE .
+
+    IDENTIFIER      reduce using rule 26 (statement -> WHILE .)
+    WRITELN         reduce using rule 26 (statement -> WHILE .)
+    WRITE           reduce using rule 26 (statement -> WHILE .)
+    READLN          reduce using rule 26 (statement -> WHILE .)
+    READ            reduce using rule 26 (statement -> WHILE .)
+    IF              reduce using rule 26 (statement -> WHILE .)
+    FOR             reduce using rule 26 (statement -> WHILE .)
+    WHILE           reduce using rule 26 (statement -> WHILE .)
+    END             reduce using rule 26 (statement -> WHILE .)
+
+
+state 27
+
+    (5) varstail -> vardecl varstail .
+
+    BEGIN           reduce using rule 5 (varstail -> vardecl varstail .)
+
+
+state 28
+
+    (7) vardecl -> idlist COLON . type SEMICOLON
+    (11) type -> . TYPE_INTEGER
+    (12) type -> . TYPE_REAL
+    (13) type -> . BOOLEAN
+    (14) type -> . TYPE_STRING
+    (15) type -> . ARRAY LBRACKET INTEGER RBRACKET OF type
+
+    TYPE_INTEGER    shift and go to state 40
+    TYPE_REAL       shift and go to state 41
+    BOOLEAN         shift and go to state 42
+    TYPE_STRING     shift and go to state 43
+    ARRAY           shift and go to state 44
+
+    type                           shift and go to state 39
+
+state 29
+
+    (8) idlist -> IDENTIFIER idlistTail .
+
+    COLON           reduce using rule 8 (idlist -> IDENTIFIER idlistTail .)
+
+
+state 30
+
+    (9) idlistTail -> COMMA . IDENTIFIER idlistTail
+
+    IDENTIFIER      shift and go to state 45
+
+
+state 31
+
+    (10) idlistTail -> empty .
+
+    COLON           reduce using rule 10 (idlistTail -> empty .)
+
+
+state 32
+
+    (16) code -> BEGIN expressions END .
+
+    $end            reduce using rule 16 (code -> BEGIN expressions END .)
+
+
+state 33
+
+    (17) expressions -> statement expressions .
+
+    END             reduce using rule 17 (expressions -> statement expressions .)
+
+
+state 34
+
+    (19) statement -> IDENTIFIER ASSIGN . assign_expression SEMICOLON
+    (31) assign_expression -> . INTEGER
+    (32) assign_expression -> . REAL
+    (33) assign_expression -> . IDENTIFIER
+    (34) assign_expression -> . STRING
+    (35) assign_expression -> . expression
+    (36) expression -> . empty
+    (37) empty -> .
+
+    INTEGER         shift and go to state 48
+    REAL            shift and go to state 49
+    IDENTIFIER      shift and go to state 46
+    STRING          shift and go to state 50
+    SEMICOLON       reduce using rule 37 (empty -> .)
+
+    assign_expression              shift and go to state 47
+    expression                     shift and go to state 51
+    empty                          shift and go to state 52
+
+state 35
+
+    (20) statement -> WRITELN writeln_statement . SEMICOLON
+
+    SEMICOLON       shift and go to state 53
+
+
+state 36
+
+    (27) writeln_statement -> LPAREN . string_statement RPAREN
+    (29) string_statement -> . assign_expression
+    (30) string_statement -> . assign_expression COMMA string_statement
+    (31) assign_expression -> . INTEGER
+    (32) assign_expression -> . REAL
+    (33) assign_expression -> . IDENTIFIER
+    (34) assign_expression -> . STRING
+    (35) assign_expression -> . expression
+    (36) expression -> . empty
+    (37) empty -> .
+
+    INTEGER         shift and go to state 48
+    REAL            shift and go to state 49
+    IDENTIFIER      shift and go to state 46
+    STRING          shift and go to state 50
+    COMMA           reduce using rule 37 (empty -> .)
+    RPAREN          reduce using rule 37 (empty -> .)
+
+    string_statement               shift and go to state 54
+    assign_expression              shift and go to state 55
+    expression                     shift and go to state 51
+    empty                          shift and go to state 52
+
+state 37
+
+    (21) statement -> WRITE write_statement . SEMICOLON
+
+    SEMICOLON       shift and go to state 56
+
+
+state 38
+
+    (28) write_statement -> LPAREN . string_statement RPAREN
+    (29) string_statement -> . assign_expression
+    (30) string_statement -> . assign_expression COMMA string_statement
+    (31) assign_expression -> . INTEGER
+    (32) assign_expression -> . REAL
+    (33) assign_expression -> . IDENTIFIER
+    (34) assign_expression -> . STRING
+    (35) assign_expression -> . expression
+    (36) expression -> . empty
+    (37) empty -> .
+
+    INTEGER         shift and go to state 48
+    REAL            shift and go to state 49
+    IDENTIFIER      shift and go to state 46
+    STRING          shift and go to state 50
+    COMMA           reduce using rule 37 (empty -> .)
+    RPAREN          reduce using rule 37 (empty -> .)
+
+    string_statement               shift and go to state 57
+    assign_expression              shift and go to state 55
+    expression                     shift and go to state 51
+    empty                          shift and go to state 52
+
+state 39
+
+    (7) vardecl -> idlist COLON type . SEMICOLON
+
+    SEMICOLON       shift and go to state 58
+
+
+state 40
+
+    (11) type -> TYPE_INTEGER .
+
+    SEMICOLON       reduce using rule 11 (type -> TYPE_INTEGER .)
+
+
+state 41
+
+    (12) type -> TYPE_REAL .
+
+    SEMICOLON       reduce using rule 12 (type -> TYPE_REAL .)
+
+
+state 42
+
+    (13) type -> BOOLEAN .
+
+    SEMICOLON       reduce using rule 13 (type -> BOOLEAN .)
+
+
+state 43
+
+    (14) type -> TYPE_STRING .
+
+    SEMICOLON       reduce using rule 14 (type -> TYPE_STRING .)
+
+
+state 44
+
+    (15) type -> ARRAY . LBRACKET INTEGER RBRACKET OF type
+
+    LBRACKET        shift and go to state 59
+
+
+state 45
+
+    (9) idlistTail -> COMMA IDENTIFIER . idlistTail
+    (9) idlistTail -> . COMMA IDENTIFIER idlistTail
+    (10) idlistTail -> . empty
+    (37) empty -> .
+
+    COMMA           shift and go to state 30
+    COLON           reduce using rule 37 (empty -> .)
+
+    idlistTail                     shift and go to state 60
+    empty                          shift and go to state 31
+
+state 46
+
+    (33) assign_expression -> IDENTIFIER .
+
+    SEMICOLON       reduce using rule 33 (assign_expression -> IDENTIFIER .)
+    COMMA           reduce using rule 33 (assign_expression -> IDENTIFIER .)
+    RPAREN          reduce using rule 33 (assign_expression -> IDENTIFIER .)
+
+
+state 47
+
+    (19) statement -> IDENTIFIER ASSIGN assign_expression . SEMICOLON
+
+    SEMICOLON       shift and go to state 61
+
+
+state 48
+
+    (31) assign_expression -> INTEGER .
+
+    SEMICOLON       reduce using rule 31 (assign_expression -> INTEGER .)
+    COMMA           reduce using rule 31 (assign_expression -> INTEGER .)
+    RPAREN          reduce using rule 31 (assign_expression -> INTEGER .)
+
+
+state 49
+
+    (32) assign_expression -> REAL .
+
+    SEMICOLON       reduce using rule 32 (assign_expression -> REAL .)
+    COMMA           reduce using rule 32 (assign_expression -> REAL .)
+    RPAREN          reduce using rule 32 (assign_expression -> REAL .)
+
+
+state 50
+
+    (34) assign_expression -> STRING .
+
+    SEMICOLON       reduce using rule 34 (assign_expression -> STRING .)
+    COMMA           reduce using rule 34 (assign_expression -> STRING .)
+    RPAREN          reduce using rule 34 (assign_expression -> STRING .)
+
+
+state 51
+
+    (35) assign_expression -> expression .
+
+    SEMICOLON       reduce using rule 35 (assign_expression -> expression .)
+    COMMA           reduce using rule 35 (assign_expression -> expression .)
+    RPAREN          reduce using rule 35 (assign_expression -> expression .)
+
+
+state 52
+
+    (36) expression -> empty .
+
+    SEMICOLON       reduce using rule 36 (expression -> empty .)
+    COMMA           reduce using rule 36 (expression -> empty .)
+    RPAREN          reduce using rule 36 (expression -> empty .)
+
+
+state 53
+
+    (20) statement -> WRITELN writeln_statement SEMICOLON .
+
+    IDENTIFIER      reduce using rule 20 (statement -> WRITELN writeln_statement SEMICOLON .)
+    WRITELN         reduce using rule 20 (statement -> WRITELN writeln_statement SEMICOLON .)
+    WRITE           reduce using rule 20 (statement -> WRITELN writeln_statement SEMICOLON .)
+    READLN          reduce using rule 20 (statement -> WRITELN writeln_statement SEMICOLON .)
+    READ            reduce using rule 20 (statement -> WRITELN writeln_statement SEMICOLON .)
+    IF              reduce using rule 20 (statement -> WRITELN writeln_statement SEMICOLON .)
+    FOR             reduce using rule 20 (statement -> WRITELN writeln_statement SEMICOLON .)
+    WHILE           reduce using rule 20 (statement -> WRITELN writeln_statement SEMICOLON .)
+    END             reduce using rule 20 (statement -> WRITELN writeln_statement SEMICOLON .)
+
+
+state 54
+
+    (27) writeln_statement -> LPAREN string_statement . RPAREN
+
+    RPAREN          shift and go to state 62
+
+
+state 55
+
+    (29) string_statement -> assign_expression .
+    (30) string_statement -> assign_expression . COMMA string_statement
+
+    RPAREN          reduce using rule 29 (string_statement -> assign_expression .)
+    COMMA           shift and go to state 63
+
+
+state 56
+
+    (21) statement -> WRITE write_statement SEMICOLON .
+
+    IDENTIFIER      reduce using rule 21 (statement -> WRITE write_statement SEMICOLON .)
+    WRITELN         reduce using rule 21 (statement -> WRITE write_statement SEMICOLON .)
+    WRITE           reduce using rule 21 (statement -> WRITE write_statement SEMICOLON .)
+    READLN          reduce using rule 21 (statement -> WRITE write_statement SEMICOLON .)
+    READ            reduce using rule 21 (statement -> WRITE write_statement SEMICOLON .)
+    IF              reduce using rule 21 (statement -> WRITE write_statement SEMICOLON .)
+    FOR             reduce using rule 21 (statement -> WRITE write_statement SEMICOLON .)
+    WHILE           reduce using rule 21 (statement -> WRITE write_statement SEMICOLON .)
+    END             reduce using rule 21 (statement -> WRITE write_statement SEMICOLON .)
+
+
+state 57
+
+    (28) write_statement -> LPAREN string_statement . RPAREN
+
+    RPAREN          shift and go to state 64
+
+
+state 58
+
+    (7) vardecl -> idlist COLON type SEMICOLON .
+
+    IDENTIFIER      reduce using rule 7 (vardecl -> idlist COLON type SEMICOLON .)
+    BEGIN           reduce using rule 7 (vardecl -> idlist COLON type SEMICOLON .)
+
+
+state 59
+
+    (15) type -> ARRAY LBRACKET . INTEGER RBRACKET OF type
+
+    INTEGER         shift and go to state 65
+
+
+state 60
+
+    (9) idlistTail -> COMMA IDENTIFIER idlistTail .
+
+    COLON           reduce using rule 9 (idlistTail -> COMMA IDENTIFIER idlistTail .)
+
+
+state 61
+
+    (19) statement -> IDENTIFIER ASSIGN assign_expression SEMICOLON .
+
+    IDENTIFIER      reduce using rule 19 (statement -> IDENTIFIER ASSIGN assign_expression SEMICOLON .)
+    WRITELN         reduce using rule 19 (statement -> IDENTIFIER ASSIGN assign_expression SEMICOLON .)
+    WRITE           reduce using rule 19 (statement -> IDENTIFIER ASSIGN assign_expression SEMICOLON .)
+    READLN          reduce using rule 19 (statement -> IDENTIFIER ASSIGN assign_expression SEMICOLON .)
+    READ            reduce using rule 19 (statement -> IDENTIFIER ASSIGN assign_expression SEMICOLON .)
+    IF              reduce using rule 19 (statement -> IDENTIFIER ASSIGN assign_expression SEMICOLON .)
+    FOR             reduce using rule 19 (statement -> IDENTIFIER ASSIGN assign_expression SEMICOLON .)
+    WHILE           reduce using rule 19 (statement -> IDENTIFIER ASSIGN assign_expression SEMICOLON .)
+    END             reduce using rule 19 (statement -> IDENTIFIER ASSIGN assign_expression SEMICOLON .)
+
+
+state 62
+
+    (27) writeln_statement -> LPAREN string_statement RPAREN .
+
+    SEMICOLON       reduce using rule 27 (writeln_statement -> LPAREN string_statement RPAREN .)
+
+
+state 63
+
+    (30) string_statement -> assign_expression COMMA . string_statement
+    (29) string_statement -> . assign_expression
+    (30) string_statement -> . assign_expression COMMA string_statement
+    (31) assign_expression -> . INTEGER
+    (32) assign_expression -> . REAL
+    (33) assign_expression -> . IDENTIFIER
+    (34) assign_expression -> . STRING
+    (35) assign_expression -> . expression
+    (36) expression -> . empty
+    (37) empty -> .
+
+    INTEGER         shift and go to state 48
+    REAL            shift and go to state 49
+    IDENTIFIER      shift and go to state 46
+    STRING          shift and go to state 50
+    COMMA           reduce using rule 37 (empty -> .)
+    RPAREN          reduce using rule 37 (empty -> .)
+
+    assign_expression              shift and go to state 55
+    string_statement               shift and go to state 66
+    expression                     shift and go to state 51
+    empty                          shift and go to state 52
+
+state 64
+
+    (28) write_statement -> LPAREN string_statement RPAREN .
+
+    SEMICOLON       reduce using rule 28 (write_statement -> LPAREN string_statement RPAREN .)
+
+
+state 65
+
+    (15) type -> ARRAY LBRACKET INTEGER . RBRACKET OF type
+
+    RBRACKET        shift and go to state 67
+
+
+state 66
+
+    (30) string_statement -> assign_expression COMMA string_statement .
+
+    RPAREN          reduce using rule 30 (string_statement -> assign_expression COMMA string_statement .)
+
+
+state 67
+
+    (15) type -> ARRAY LBRACKET INTEGER RBRACKET . OF type
+
+    OF              shift and go to state 68
+
+
+state 68
+
+    (15) type -> ARRAY LBRACKET INTEGER RBRACKET OF . type
+    (11) type -> . TYPE_INTEGER
+    (12) type -> . TYPE_REAL
+    (13) type -> . BOOLEAN
+    (14) type -> . TYPE_STRING
+    (15) type -> . ARRAY LBRACKET INTEGER RBRACKET OF type
+
+    TYPE_INTEGER    shift and go to state 40
+    TYPE_REAL       shift and go to state 41
+    BOOLEAN         shift and go to state 42
+    TYPE_STRING     shift and go to state 43
+    ARRAY           shift and go to state 44
+
+    type                           shift and go to state 69
+
+state 69
+
+    (15) type -> ARRAY LBRACKET INTEGER RBRACKET OF type .
+
+    SEMICOLON       reduce using rule 15 (type -> ARRAY LBRACKET INTEGER RBRACKET OF type .)
+

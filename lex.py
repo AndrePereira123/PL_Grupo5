@@ -6,7 +6,7 @@ error_count = 0  # Contador de erros
 # Lista de tokens
 tokens = (
     'COMMENT',
-    'NUMBER',
+    'INTEGER',
     'PLUS',
     'MINUS',
     'TIMES',
@@ -27,12 +27,14 @@ tokens = (
     'GE',
     'NE',
     'IDENTIFIER',
+    'TYPE_STRING',
     'STRING',
     'PROGRAM',
     'BEGIN',
     'END',
     'VAR',
-    'INTEGER',
+    'TYPE_INTEGER',
+    'TYPE_REAL',
     'REAL',
     'BOOLEAN',
     'IF',
@@ -99,14 +101,19 @@ def t_VAR(t):
     t.type = 'VAR'
     return t
 
-def t_INTEGER(t):
+def t_TYPE_INTEGER(t):
     r'integer'
-    t.type = 'INTEGER'
+    t.type = 'TYPE_INTEGER'
     return t
 
-def t_REAL(t):
+def t_TYPE_STRING(t):
+    r'string'
+    t.type = 'TYPE_STRING'
+    return t
+
+def t_TYPE_REAL(t):
     r'real'
-    t.type = 'REAL'
+    t.type = 'TYPE_REAL'
     return t
 
 def t_BOOLEAN(t):
@@ -235,8 +242,14 @@ def t_STRING(t):
     t.value = t.value[1:-1]  # Remover aspas
     return t
 
+
+def t_REAL(t):
+    r'[+|-]?\d+\.\d+'
+    t.value = float(t.value)
+    return t
+
 # Números
-def t_NUMBER(t):
+def t_INTEGER(t):
     r'[+|-]?\d+'
     t.value = int(t.value)
     return t
@@ -261,7 +274,7 @@ lexer = lex.lex(reflags=re.IGNORECASE)
 
 # Testar o lexer com um exemplo de código Pascal
 if __name__ == "__main__":
-    file = open("./texto_exemplo.txt", "r", encoding="utf-8")
+    file = open("programas_pascal/hello_world.pas", "r", encoding="utf-8")
     data = file.read()
     file.close()
 
