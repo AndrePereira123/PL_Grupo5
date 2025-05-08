@@ -24,7 +24,7 @@ idlistTail : COMMA idlist
            | 
 
 type : INTEGER
-     | REAL
+     | TYPE_REAL
      | BOOLEAN
      | STRING
      | ARRAY LBRACKET NUMBER RBRACKET OF type

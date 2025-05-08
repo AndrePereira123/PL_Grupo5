@@ -1,28 +1,28 @@
-PUSHI 0
-PUSHF 0
-PUSHS ""
+     PUSHI 0
+     PUSHF 0
+     PUSHS ""
 START
-PUSHF 12.23
-STRF
-PUSHS "Ola, Mundo!"
-CONCAT
-WRITES
-WRITELN
-PUSHI 10
-STOREG 0
-PUSHF 12.23
-STOREG 1
-PUSHS "Ola, Mundo!"
-STOREG 2
-PUSHFP
-LOAD -3
-STRI
-WRITES
-WRITELN
-PUSHS "Ola, Mundo!"
-WRITES
-WRITELN
-PUSHS "Ola, Mundo!"
-WRITES
-WRITELN
+     PUSHF 12.23
+       STRF
+     PUSHS "Ola, Mundo!"
+     CONCAT
+     WRITES
+       WRITELN
+     PUSHI 10
+       STOREG 0
+     PUSHF 12.23
+       STOREG 1
+     PUSHS "Ola, Mundo!"
+       STOREG 2
+     PUSHFP
+       LOAD -3
+       STRI
+     WRITES
+       WRITELN
+     PUSHS "Ola, Mundo!"
+     WRITES
+       WRITELN
+     PUSHS "Ola, Mundo!"
+     WRITES
+       WRITELN
 STOP

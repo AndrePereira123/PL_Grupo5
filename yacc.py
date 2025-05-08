@@ -55,13 +55,13 @@ def p_vardecl(p):
         index += 1 
         p[3] = p[3].lower()
         if p[3] == 'integer' or p[3] == 'boolean':
-            p[0] += ["PUSHI 0\n"]
+            p[0] += ["     PUSHI 0\n"]
 
         elif p[3] == 'real':
-            p[0] += f"PUSHF 0\n"
+            p[0] += ["     PUSHF 0\n"]
 
         elif p[3] == 'string':
-            p[0] += f"PUSHS \"\"\n"
+            p[0] += ["     PUSHS \"\"\n"]
 
         elif p[3] == 'array':
             pass  ## TODO: array
@@ -136,11 +136,11 @@ def p_statement(p):
         if type.lower() != tipo:
             raise TypeError(f"Tipo de dado inválido para atribuição: {tipo} para {p[1]}")   
         if tipo == 'integer' :      
-            p[0] = ["PUSHI " + str(var) + "\n"] + ["STOREG " + str(index_var) + "\n"]
+            p[0] = ["     PUSHI " + str(var) + "\n"] + ["       STOREG " + str(index_var) + "\n"]
         elif tipo == 'real':
-            p[0] = ["PUSHF " + str(var) + "\n"] + ["STOREG " + str(index_var) + "\n"]
+            p[0] = ["     PUSHF " + str(var) + "\n"] + ["       STOREG " + str(index_var) + "\n"]
         elif tipo == 'string':
-            p[0] = ["PUSHS \"" + str(var) + "\"\n"] + ["STOREG " + str(index_var) + "\n"]
+            p[0] = ["     PUSHS \"" + str(var) + "\"\n"] + ["       STOREG " + str(index_var) + "\n"]
         elif tipo == 'boolean':
             ##TODO ajustar boleano para ser TRUE/FALSE
             pass
@@ -159,32 +159,32 @@ def p_writeln_statement(p):
         print(f"Argument type: {argtype}")
 
         if argtype == 'STRING':
-            p[0] += ["PUSHS \"" + arg[1] + "\"\n"]
+            p[0] += ["     PUSHS \"" + arg[1] + "\"\n"]
         
         elif argtype == 'IDENTIFIER':
             global variaveis, index
             if variaveis.get(arg[1]) is not None:  ##TODO nao suporta varaiveis dentro de arrays
                 tipo, index_var = variaveis[arg[1]]
                 profundidade = index_var - index
-                p[0] += ["PUSHFP\nLOAD " + str(profundidade) + "\n"]
+                p[0] += ["     PUSHFP\n       LOAD " + str(profundidade) + "\n"]
                 if tipo == 'integer' or tipo == 'boolean':      ##TODO ajustar boleano para ser TRUE/FALSE
-                    p[0] += ["STRI\n"]
+                    p[0] += ["       STRI\n"]
                 elif tipo == 'real':
-                    p[0] += ["STRF\n"]
+                    p[0] += ["       STRF\n"]
                     
         elif argtype == 'INTEGER': ## TODO verificar ints ou reais
-            p[0] += ["PUSHI " + str(arg[1]) + "\nSTRI\n"]
+            p[0] += ["     PUSHI " + str(arg[1]) + "\n       STRI\n"]
         elif argtype == 'REAL':
-            p[0] += ["PUSHF " + str(arg[1]) + "\nSTRF\n"]
+            p[0] += ["     PUSHF " + str(arg[1]) + "\n       STRF\n"]
         elif argtype == 'expression':
             p[0] += p[2]    
         
         if not first_iteration:
-            p[0] += ["CONCAT\n"]
+            p[0] += ["     CONCAT\n"]
         else:
             first_iteration = False
     
-    p[0] += ["WRITES\nWRITELN\n"]
+    p[0] += ["     WRITES\n       WRITELN\n"]
 
 def p_write_statement(p):
     'write_statement : LPAREN string_statement RPAREN'
@@ -222,7 +222,7 @@ def p_empty(p):
     'empty :'
     p[0] = None
 
-parser = yacc.yacc()
+parser = yacc.yacc(debug=True)
 
 with open('programas_pascal/hello_world.pas', 'r') as file:
     data = file.read()

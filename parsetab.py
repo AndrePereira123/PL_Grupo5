@@ -6,7 +6,7 @@ _tabversion = '3.10'
 
 _lr_method = 'LALR'
 
-_lr_signature = 'AND ARRAY ASSIGN BEGIN BOOLEAN COLON COMMA COMMENT DIVIDE DO DOT DOWNTO ELSE END EQUAL FALSE FOR FUNCTION GE GT IDENTIFIER IF INTEGER LBRACKET LE LPAREN LT MINUS NE NOT OF OR PLUS PROCEDURE PROGRAM RBRACKET READ READLN REAL RPAREN SEMICOLON STRING THEN TIMES TO TRUE TYPE_INTEGER TYPE_REAL TYPE_STRING VAR WHILE WRITE WRITELNfile : PROGRAM name vars codename : IDENTIFIER SEMICOLONvars : VAR varstail\n           | emptyvarstail : vardecl varstail\n                | emptyvardecl : idlist COLON type SEMICOLONidlist : IDENTIFIER idlistTailidlistTail : COMMA IDENTIFIER idlistTail\n           | emptytype : TYPE_INTEGER\n           | TYPE_REAL\n           | BOOLEAN\n           | TYPE_STRING\n           | ARRAY LBRACKET INTEGER RBRACKET OF typecode : BEGIN expressions ENDexpressions : statement expressions\n                   | emptystatement : IDENTIFIER ASSIGN assign_expression SEMICOLON \n                | WRITELN writeln_statement SEMICOLON\n                | WRITE write_statement SEMICOLON\n                | READLN \n                | READ \n                | IF            \n                | FOR \n                | WHILE writeln_statement : LPAREN string_statement RPARENwrite_statement : LPAREN string_statement RPARENstring_statement : assign_expression\n                        | assign_expression COMMA string_statementassign_expression : INTEGER\n                         | REAL\n                         | IDENTIFIER       \n                         | STRING\n                         | expression expression : emptyempty :'
+_lr_signature = 'AND ARRAY ASSIGN BEGIN BOOLEAN COLON COMMA COMMENT DIVIDE DO DOT DOWNTO ELSE END EQUAL FALSE FOR FUNCTION GE GT IDENTIFIER IF INTEGER LBRACKET LE LPAREN LT MINUS NE NOT OF OR PLUS PROCEDURE PROGRAM RBRACKET READ READLN REAL RPAREN SEMICOLON STRING THEN TIMES TO TRUE TYPE_INTEGER TYPE_REAL TYPE_STRING VAR WHILE WRITE WRITELNfile : PROGRAM name vars codename : IDENTIFIER SEMICOLONvars : VAR varstail\n| emptyvarstail : vardecl varstail\n| emptyvardecl : idlist COLON type SEMICOLONidlist : IDENTIFIER idlistTailidlistTail : COMMA IDENTIFIER idlistTail\n| emptytype : TYPE_INTEGER\n| TYPE_REAL\n| BOOLEAN\n| TYPE_STRING\n| ARRAY LBRACKET INTEGER RBRACKET OF typecode : BEGIN expressions ENDexpressions : statement expressions\n| emptystatement : IDENTIFIER ASSIGN assign_expression SEMICOLON \n| WRITELN writeln_statement SEMICOLON\n| WRITE write_statement SEMICOLON\n| READLN \n| READ \n| IF            \n| FOR \n| WHILE writeln_statement : LPAREN string_statement RPARENwrite_statement : LPAREN string_statement RPARENstring_statement : assign_expression\n| assign_expression COMMA string_statementassign_expression : INTEGER\n| REAL\n| IDENTIFIER       \n| STRING\n| expression expression : emptyempty :'
     
 _lr_action_items = {'PROGRAM':([0,],[2,]),'$end':([1,9,32,],[0,-1,-16,]),'IDENTIFIER':([2,6,10,12,17,22,23,24,25,26,30,34,36,38,53,56,58,61,63,],[4,15,19,15,19,-22,-23,-24,-25,-26,45,46,46,46,-20,-21,-7,-19,46,]),'VAR':([3,8,],[6,-2,]),'BEGIN':([3,5,6,7,8,11,12,13,27,58,],[-37,10,-37,-4,-2,-3,-37,-6,-5,-7,]),'SEMICOLON':([4,34,35,37,39,40,41,42,43,46,47,48,49,50,51,52,62,64,69,],[8,-37,53,56,58,-11,-12,-13,-14,-33,61,-31,-32,-34,-35,-36,-27,-28,-15,]),'WRITELN':([10,17,22,23,24,25,26,53,56,61,],[20,20,-22,-23,-24,-25,-26,-20,-21,-19,]),'WRITE':([10,17,22,23,24,25,26,53,56,61,],[21,21,-22,-23,-24,-25,-26,-20,-21,-19,]),'READLN':([10,17,22,23,24,25,26,53,56,61,],[22,22,-22,-23,-24,-25,-26,-20,-21,-19,]),'READ':([10,17,22,23,24,25,26,53,56,61,],[23,23,-22,-23,-24,-25,-26,-20,-21,-19,]),'IF':([10,17,22,23,24,25,26,53,56,61,],[24,24,-22,-23,-24,-25,-26,-20,-21,-19,]),'FOR':([10,17,22,23,24,25,26,53,56,61,],[25,25,-22,-23,-24,-25,-26,-20,-21,-19,]),'WHILE':([10,17,22,23,24,25,26,53,56,61,],[26,26,-22,-23,-24,-25,-26,-20,-21,-19,]),'END':([10,16,17,18,22,23,24,25,26,33,53,56,61,],[-37,32,-37,-18,-22,-23,-24,-25,-26,-17,-20,-21,-19,]),'COLON':([14,15,29,31,45,60,],[28,-37,-8,-10,-37,-9,]),'COMMA':([15,36,38,45,46,48,49,50,51,52,55,63,],[30,-37,-37,30,-33,-31,-32,-34,-35,-36,63,-37,]),'ASSIGN':([19,],[34,]),'LPAREN':([20,21,],[36,38,]),'TYPE_INTEGER':([28,68,],[40,40,]),'TYPE_REAL':([28,68,],[41,41,]),'BOOLEAN':([28,68,],[42,42,]),'TYPE_STRING':([28,68,],[43,43,]),'ARRAY':([28,68,],[44,44,]),'INTEGER':([34,36,38,59,63,],[48,48,48,65,48,]),'REAL':([34,36,38,63,],[49,49,49,49,]),'STRING':([34,36,38,63,],[50,50,50,50,]),'RPAREN':([36,38,46,48,49,50,51,52,54,55,57,63,66,],[-37,-37,-33,-31,-32,-34,-35,-36,62,-29,64,-37,-30,]),'LBRACKET':([44,],[59,]),'RBRACKET':([65,],[67,]),'OF':([67,],[68,]),}
 
@@ -53,15 +53,15 @@ _lr_productions = [
   ('statement -> IF','statement',1,'p_statement','yacc.py',128),
   ('statement -> FOR','statement',1,'p_statement','yacc.py',129),
   ('statement -> WHILE','statement',1,'p_statement','yacc.py',130),
-  ('writeln_statement -> LPAREN string_statement RPAREN','writeln_statement',3,'p_writeln_statement','yacc.py',148),
-  ('write_statement -> LPAREN string_statement RPAREN','write_statement',3,'p_write_statement','yacc.py',185),
-  ('string_statement -> assign_expression','string_statement',1,'p_string_statement','yacc.py',189),
-  ('string_statement -> assign_expression COMMA string_statement','string_statement',3,'p_string_statement','yacc.py',190),
-  ('assign_expression -> INTEGER','assign_expression',1,'p_assign_expression','yacc.py',197),
-  ('assign_expression -> REAL','assign_expression',1,'p_assign_expression','yacc.py',198),
-  ('assign_expression -> IDENTIFIER','assign_expression',1,'p_assign_expression','yacc.py',199),
-  ('assign_expression -> STRING','assign_expression',1,'p_assign_expression','yacc.py',200),
-  ('assign_expression -> expression','assign_expression',1,'p_assign_expression','yacc.py',201),
-  ('expression -> empty','expression',1,'p_expression','yacc.py',205),
-  ('empty -> <empty>','empty',0,'p_empty','yacc.py',217),
+  ('writeln_statement -> LPAREN string_statement RPAREN','writeln_statement',3,'p_writeln_statement','yacc.py',153),
+  ('write_statement -> LPAREN string_statement RPAREN','write_statement',3,'p_write_statement','yacc.py',190),
+  ('string_statement -> assign_expression','string_statement',1,'p_string_statement','yacc.py',194),
+  ('string_statement -> assign_expression COMMA string_statement','string_statement',3,'p_string_statement','yacc.py',195),
+  ('assign_expression -> INTEGER','assign_expression',1,'p_assign_expression','yacc.py',202),
+  ('assign_expression -> REAL','assign_expression',1,'p_assign_expression','yacc.py',203),
+  ('assign_expression -> IDENTIFIER','assign_expression',1,'p_assign_expression','yacc.py',204),
+  ('assign_expression -> STRING','assign_expression',1,'p_assign_expression','yacc.py',205),
+  ('assign_expression -> expression','assign_expression',1,'p_assign_expression','yacc.py',206),
+  ('expression -> empty','expression',1,'p_expression','yacc.py',210),
+  ('empty -> <empty>','empty',0,'p_empty','yacc.py',222),
 ]

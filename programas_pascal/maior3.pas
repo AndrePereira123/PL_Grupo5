@@ -5,7 +5,7 @@ begin
     { Ler 3 números }
     Write('Introduza o primeiro número: ');
     ReadLn(num1);
-
+    
     Write('Introduza o segundo número: ');
     ReadLn(num2);
 
