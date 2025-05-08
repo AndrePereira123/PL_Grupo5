@@ -31,13 +31,15 @@ type : INTEGER
 
 program : BEGIN expressions END
 
-expressions : statement expressions
+expressions : statement expressions_tail
             | 
+
+expressions_tail : SEMICOLON expressions
+                 |
 
 statement : WRITELN writeln_statement SEMICOLON
           | WRITE write_statement SEMICOLON
-          | READLN
-          | READ
+          | READLN readln_statement SEMICOLON
           | IF 
           | FOR 
           | WHILE
@@ -52,11 +54,18 @@ Variables (e.g., writeln(a);)
 Expressions (e.g., writeln(1 + 2);)
 Multiple values separated by commas (e.g., writeln('Sum:', 1 + 2);)
 
+-------------------------------------------------------
+-------------------------------------------------------
 
 writeln_statement : LPAREN string_statement RPAREN
 
 write_statement : LPAREN string_statement RPAREN
 
+-------------------------------------------------------
+
+readln_statement : LPAREN  string_statement  RPAREN
+
+-------------------------------------------------------
 
 string_statement : string_argument
                  | string_argument COMMA string_statement
@@ -67,8 +76,7 @@ string_argument : STRING
                 | expression
 
 -------------------------------------------------------
-
-
+-------------------------------------------------------
 
 
 

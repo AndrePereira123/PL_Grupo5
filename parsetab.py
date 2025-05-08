@@ -6,9 +6,9 @@ _tabversion = '3.10'
 
 _lr_method = 'LALR'
 
-_lr_signature = 'AND ARRAY ASSIGN BEGIN BOOLEAN COLON COMMA COMMENT DIVIDE DO DOT DOWNTO ELSE END EQUAL FALSE FOR FUNCTION GE GT IDENTIFIER IF INTEGER LBRACKET LE LPAREN LT MINUS NE NOT OF OR PLUS PROCEDURE PROGRAM RBRACKET READ READLN REAL RPAREN SEMICOLON STRING THEN TIMES TO TRUE TYPE_INTEGER TYPE_REAL TYPE_STRING VAR WHILE WRITE WRITELNfile : PROGRAM name vars codename : IDENTIFIER SEMICOLONvars : VAR varstail\n| emptyvarstail : vardecl varstail\n| emptyvardecl : idlist COLON type SEMICOLONidlist : IDENTIFIER idlistTailidlistTail : COMMA IDENTIFIER idlistTail\n| emptytype : TYPE_INTEGER\n| TYPE_REAL\n| BOOLEAN\n| TYPE_STRING\n| ARRAY LBRACKET INTEGER RBRACKET OF typecode : BEGIN expressions ENDexpressions : statement expressions\n| emptystatement : IDENTIFIER ASSIGN assign_expression SEMICOLON \n| WRITELN writeln_statement SEMICOLON\n| WRITE write_statement SEMICOLON\n| READLN \n| READ \n| IF            \n| FOR \n| WHILE writeln_statement : LPAREN string_statement RPARENwrite_statement : LPAREN string_statement RPARENstring_statement : assign_expression\n| assign_expression COMMA string_statementassign_expression : INTEGER\n| REAL\n| IDENTIFIER       \n| STRING\n| expression expression : emptyempty :'
+_lr_signature = 'AND ARRAY ASSIGN BEGIN BOOLEAN COLON COMMA COMMENT DIVIDE DO DOT DOWNTO ELSE END EQUAL FALSE FOR FUNCTION GE GT IDENTIFIER IF INTEGER LBRACKET LE LPAREN LT MINUS NE NOT OF OR PLUS PROCEDURE PROGRAM RBRACKET READLN REAL REAL_DIVIDE RPAREN SEMICOLON STRING THEN TIMES TO TRUE TYPE_INTEGER TYPE_REAL TYPE_STRING VAR WHILE WRITE WRITELNfile : PROGRAM name vars codename : IDENTIFIER SEMICOLONvars : VAR varstail\n           | emptyvarstail : vardecl varstail\n                | emptyvardecl : idlist COLON type SEMICOLONidlist : IDENTIFIER idlistTailidlistTail : COMMA IDENTIFIER idlistTail\n           | emptytype : TYPE_INTEGER\n           | TYPE_REAL\n           | BOOLEAN\n           | TYPE_STRING\n           | ARRAY LBRACKET INTEGER RBRACKET OF typecode : BEGIN expressions ENDexpressions : statement expressions_tail\n                   | emptyexpressions_tail : SEMICOLON expressions\n                        | emptystatement : IDENTIFIER ASSIGN assign_expression  \n                | WRITELN write_statement \n                | WRITE write_statement \n                | READLN readln_statement \n                | IF if_condition THEN expressions ELSE expressions\n                | FOR \n                | WHILE if_condition : expression\n                    | expression AND if_condition\n                    | expression OR if_conditionwrite_statement : LPAREN string_statement RPARENreadln_statement : LPAREN string_statement RPARENstring_statement : assign_expression\n                        | assign_expression COMMA string_statementassign_expression : expression\n                         | STRING expression : simple_expression expression_tailexpression_tail : LT simple_expression\n                        | GT simple_expression\n                        | LE simple_expression\n                        | GE simple_expression\n                        | NE simple_expression\n                        | EQUAL simple_expression\n                        | emptysimple_expression : term simple_expression_tailsimple_expression_tail : PLUS term simple_expression_tail\n                             | MINUS term simple_expression_tail\n                             | emptyterm : factor term_tailterm_tail : TIMES factor term_tail\n                 | DIVIDE factor term_tail\n                 | REAL_DIVIDE factor term_tail\n                 | emptyfactor : PLUS factor\n              | MINUS factor\n              | LPAREN expression RPAREN\n              | INTEGER\n              | REAL\n              | IDENTIFIERempty :'
     
-_lr_action_items = {'PROGRAM':([0,],[2,]),'$end':([1,9,32,],[0,-1,-16,]),'IDENTIFIER':([2,6,10,12,17,22,23,24,25,26,30,34,36,38,53,56,58,61,63,],[4,15,19,15,19,-22,-23,-24,-25,-26,45,46,46,46,-20,-21,-7,-19,46,]),'VAR':([3,8,],[6,-2,]),'BEGIN':([3,5,6,7,8,11,12,13,27,58,],[-37,10,-37,-4,-2,-3,-37,-6,-5,-7,]),'SEMICOLON':([4,34,35,37,39,40,41,42,43,46,47,48,49,50,51,52,62,64,69,],[8,-37,53,56,58,-11,-12,-13,-14,-33,61,-31,-32,-34,-35,-36,-27,-28,-15,]),'WRITELN':([10,17,22,23,24,25,26,53,56,61,],[20,20,-22,-23,-24,-25,-26,-20,-21,-19,]),'WRITE':([10,17,22,23,24,25,26,53,56,61,],[21,21,-22,-23,-24,-25,-26,-20,-21,-19,]),'READLN':([10,17,22,23,24,25,26,53,56,61,],[22,22,-22,-23,-24,-25,-26,-20,-21,-19,]),'READ':([10,17,22,23,24,25,26,53,56,61,],[23,23,-22,-23,-24,-25,-26,-20,-21,-19,]),'IF':([10,17,22,23,24,25,26,53,56,61,],[24,24,-22,-23,-24,-25,-26,-20,-21,-19,]),'FOR':([10,17,22,23,24,25,26,53,56,61,],[25,25,-22,-23,-24,-25,-26,-20,-21,-19,]),'WHILE':([10,17,22,23,24,25,26,53,56,61,],[26,26,-22,-23,-24,-25,-26,-20,-21,-19,]),'END':([10,16,17,18,22,23,24,25,26,33,53,56,61,],[-37,32,-37,-18,-22,-23,-24,-25,-26,-17,-20,-21,-19,]),'COLON':([14,15,29,31,45,60,],[28,-37,-8,-10,-37,-9,]),'COMMA':([15,36,38,45,46,48,49,50,51,52,55,63,],[30,-37,-37,30,-33,-31,-32,-34,-35,-36,63,-37,]),'ASSIGN':([19,],[34,]),'LPAREN':([20,21,],[36,38,]),'TYPE_INTEGER':([28,68,],[40,40,]),'TYPE_REAL':([28,68,],[41,41,]),'BOOLEAN':([28,68,],[42,42,]),'TYPE_STRING':([28,68,],[43,43,]),'ARRAY':([28,68,],[44,44,]),'INTEGER':([34,36,38,59,63,],[48,48,48,65,48,]),'REAL':([34,36,38,63,],[49,49,49,49,]),'STRING':([34,36,38,63,],[50,50,50,50,]),'RPAREN':([36,38,46,48,49,50,51,52,54,55,57,63,66,],[-37,-37,-33,-31,-32,-34,-35,-36,62,-29,64,-37,-30,]),'LBRACKET':([44,],[59,]),'RBRACKET':([65,],[67,]),'OF':([67,],[68,]),}
+_lr_action_items = {'PROGRAM':([0,],[2,]),'$end':([1,9,31,],[0,-1,-16,]),'IDENTIFIER':([2,6,10,12,23,29,33,35,37,40,46,47,48,66,67,68,70,71,72,73,74,75,78,79,82,83,84,89,93,112,],[4,15,19,15,51,58,19,51,51,51,51,51,51,19,51,51,51,51,51,51,51,51,51,51,51,51,51,-7,51,19,]),'VAR':([3,8,],[6,-2,]),'BEGIN':([3,5,6,7,8,11,12,13,26,89,],[-60,10,-60,-4,-2,-3,-60,-6,-5,-7,]),'SEMICOLON':([4,17,18,24,25,32,33,34,36,38,39,43,44,45,49,50,51,52,53,54,55,56,59,60,61,62,69,76,77,80,81,85,86,87,92,94,98,99,100,101,102,103,104,105,106,107,108,109,112,113,114,115,116,117,119,121,],[8,33,-18,-26,-27,-17,-60,-20,-22,-23,-24,-60,-60,-60,-57,-58,-59,89,-11,-12,-13,-14,-19,-21,-35,-36,-37,-44,-45,-48,-49,-53,-54,-55,-31,-32,-38,-39,-40,-41,-42,-43,-60,-60,-60,-60,-60,-56,-60,-46,-47,-50,-51,-52,-25,-15,]),'WRITELN':([10,33,66,112,],[20,20,20,20,]),'WRITE':([10,33,66,112,],[21,21,21,21,]),'READLN':([10,33,66,112,],[22,22,22,22,]),'IF':([10,33,66,112,],[23,23,23,23,]),'FOR':([10,33,66,112,],[24,24,24,24,]),'WHILE':([10,33,66,112,],[25,25,25,25,]),'END':([10,16,17,18,24,25,32,33,34,36,38,39,43,44,45,49,50,51,59,60,61,62,69,76,77,80,81,85,86,87,92,94,98,99,100,101,102,103,104,105,106,107,108,109,112,113,114,115,116,117,119,],[-60,31,-60,-18,-26,-27,-17,-60,-20,-22,-23,-24,-60,-60,-60,-57,-58,-59,-19,-21,-35,-36,-37,-44,-45,-48,-49,-53,-54,-55,-31,-32,-38,-39,-40,-41,-42,-43,-60,-60,-60,-60,-60,-56,-60,-46,-47,-50,-51,-52,-25,]),'COLON':([14,15,28,30,58,91,],[27,-60,-8,-10,-60,-9,]),'COMMA':([15,43,44,45,49,50,51,58,61,62,64,69,76,77,80,81,85,86,87,98,99,100,101,102,103,104,105,106,107,108,109,113,114,115,116,117,],[29,-60,-60,-60,-57,-58,-59,29,-35,-36,93,-37,-44,-45,-48,-49,-53,-54,-55,-38,-39,-40,-41,-42,-43,-60,-60,-60,-60,-60,-56,-46,-47,-50,-51,-52,]),'ELSE':([17,18,24,25,32,33,34,36,38,39,43,44,45,49,50,51,59,60,61,62,66,69,76,77,80,81,85,86,87,92,94,95,98,99,100,101,102,103,104,105,106,107,108,109,112,113,114,115,116,117,119,],[-60,-18,-26,-27,-17,-60,-20,-22,-23,-24,-60,-60,-60,-57,-58,-59,-19,-21,-35,-36,-60,-37,-44,-45,-48,-49,-53,-54,-55,-31,-32,112,-38,-39,-40,-41,-42,-43,-60,-60,-60,-60,-60,-56,-60,-46,-47,-50,-51,-52,-25,]),'ASSIGN':([19,],[35,]),'LPAREN':([20,21,22,23,35,37,40,46,47,48,67,68,70,71,72,73,74,75,78,79,82,83,84,93,],[37,37,40,48,48,48,48,48,48,48,48,48,48,48,48,48,48,48,48,48,48,48,48,48,]),'PLUS':([23,35,37,40,44,45,46,47,48,49,50,51,67,68,70,71,72,73,74,75,78,79,81,82,83,84,85,86,87,93,104,105,106,107,108,109,115,116,117,],[46,46,46,46,78,-60,46,46,46,-57,-58,-59,46,46,46,46,46,46,46,46,46,46,-49,46,46,46,-53,-54,-55,46,78,78,-60,-60,-60,-56,-50,-51,-52,]),'MINUS':([23,35,37,40,44,45,46,47,48,49,50,51,67,68,70,71,72,73,74,75,78,79,81,82,83,84,85,86,87,93,104,105,106,107,108,109,115,116,117,],[47,47,47,47,79,-60,47,47,47,-57,-58,-59,47,47,47,47,47,47,47,47,47,47,-49,47,47,47,-53,-54,-55,47,79,79,-60,-60,-60,-56,-50,-51,-52,]),'INTEGER':([23,35,37,40,46,47,48,67,68,70,71,72,73,74,75,78,79,82,83,84,90,93,],[49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,110,49,]),'REAL':([23,35,37,40,46,47,48,67,68,70,71,72,73,74,75,78,79,82,83,84,93,],[50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,]),'TYPE_INTEGER':([27,120,],[53,53,]),'TYPE_REAL':([27,120,],[54,54,]),'BOOLEAN':([27,120,],[55,55,]),'TYPE_STRING':([27,120,],[56,56,]),'ARRAY':([27,120,],[57,57,]),'STRING':([35,37,40,93,],[62,62,62,62,]),'THEN':([41,42,43,44,45,49,50,51,69,76,77,80,81,85,86,87,96,97,98,99,100,101,102,103,104,105,106,107,108,109,113,114,115,116,117,],[66,-28,-60,-60,-60,-57,-58,-59,-37,-44,-45,-48,-49,-53,-54,-55,-29,-30,-38,-39,-40,-41,-42,-43,-60,-60,-60,-60,-60,-56,-46,-47,-50,-51,-52,]),'AND':([42,43,44,45,49,50,51,69,76,77,80,81,85,86,87,98,99,100,101,102,103,104,105,106,107,108,109,113,114,115,116,117,],[67,-60,-60,-60,-57,-58,-59,-37,-44,-45,-48,-49,-53,-54,-55,-38,-39,-40,-41,-42,-43,-60,-60,-60,-60,-60,-56,-46,-47,-50,-51,-52,]),'OR':([42,43,44,45,49,50,51,69,76,77,80,81,85,86,87,98,99,100,101,102,103,104,105,106,107,108,109,113,114,115,116,117,],[68,-60,-60,-60,-57,-58,-59,-37,-44,-45,-48,-49,-53,-54,-55,-38,-39,-40,-41,-42,-43,-60,-60,-60,-60,-60,-56,-46,-47,-50,-51,-52,]),'LT':([43,44,45,49,50,51,77,80,81,85,86,87,104,105,106,107,108,109,113,114,115,116,117,],[70,-60,-60,-57,-58,-59,-45,-48,-49,-53,-54,-55,-60,-60,-60,-60,-60,-56,-46,-47,-50,-51,-52,]),'GT':([43,44,45,49,50,51,77,80,81,85,86,87,104,105,106,107,108,109,113,114,115,116,117,],[71,-60,-60,-57,-58,-59,-45,-48,-49,-53,-54,-55,-60,-60,-60,-60,-60,-56,-46,-47,-50,-51,-52,]),'LE':([43,44,45,49,50,51,77,80,81,85,86,87,104,105,106,107,108,109,113,114,115,116,117,],[72,-60,-60,-57,-58,-59,-45,-48,-49,-53,-54,-55,-60,-60,-60,-60,-60,-56,-46,-47,-50,-51,-52,]),'GE':([43,44,45,49,50,51,77,80,81,85,86,87,104,105,106,107,108,109,113,114,115,116,117,],[73,-60,-60,-57,-58,-59,-45,-48,-49,-53,-54,-55,-60,-60,-60,-60,-60,-56,-46,-47,-50,-51,-52,]),'NE':([43,44,45,49,50,51,77,80,81,85,86,87,104,105,106,107,108,109,113,114,115,116,117,],[74,-60,-60,-57,-58,-59,-45,-48,-49,-53,-54,-55,-60,-60,-60,-60,-60,-56,-46,-47,-50,-51,-52,]),'EQUAL':([43,44,45,49,50,51,77,80,81,85,86,87,104,105,106,107,108,109,113,114,115,116,117,],[75,-60,-60,-57,-58,-59,-45,-48,-49,-53,-54,-55,-60,-60,-60,-60,-60,-56,-46,-47,-50,-51,-52,]),'RPAREN':([43,44,45,49,50,51,61,62,63,64,65,69,76,77,80,81,85,86,87,88,98,99,100,101,102,103,104,105,106,107,108,109,111,113,114,115,116,117,],[-60,-60,-60,-57,-58,-59,-35,-36,92,-33,94,-37,-44,-45,-48,-49,-53,-54,-55,109,-38,-39,-40,-41,-42,-43,-60,-60,-60,-60,-60,-56,-34,-46,-47,-50,-51,-52,]),'TIMES':([45,49,50,51,86,87,106,107,108,109,],[82,-57,-58,-59,-54,-55,82,82,82,-56,]),'DIVIDE':([45,49,50,51,86,87,106,107,108,109,],[83,-57,-58,-59,-54,-55,83,83,83,-56,]),'REAL_DIVIDE':([45,49,50,51,86,87,106,107,108,109,],[84,-57,-58,-59,-54,-55,84,84,84,-56,]),'LBRACKET':([57,],[90,]),'RBRACKET':([110,],[118,]),'OF':([118,],[120,]),}
 
 _lr_action = {}
 for _k, _v in _lr_action_items.items():
@@ -17,7 +17,7 @@ for _k, _v in _lr_action_items.items():
       _lr_action[_x][_k] = _y
 del _lr_action_items
 
-_lr_goto_items = {'file':([0,],[1,]),'name':([2,],[3,]),'vars':([3,],[5,]),'empty':([3,6,10,12,15,17,34,36,38,45,63,],[7,13,18,13,31,18,52,52,52,31,52,]),'code':([5,],[9,]),'varstail':([6,12,],[11,27,]),'vardecl':([6,12,],[12,12,]),'idlist':([6,12,],[14,14,]),'expressions':([10,17,],[16,33,]),'statement':([10,17,],[17,17,]),'idlistTail':([15,45,],[29,60,]),'writeln_statement':([20,],[35,]),'write_statement':([21,],[37,]),'type':([28,68,],[39,69,]),'assign_expression':([34,36,38,63,],[47,55,55,55,]),'expression':([34,36,38,63,],[51,51,51,51,]),'string_statement':([36,38,63,],[54,57,66,]),}
+_lr_goto_items = {'file':([0,],[1,]),'name':([2,],[3,]),'vars':([3,],[5,]),'empty':([3,6,10,12,15,17,33,43,44,45,58,66,104,105,106,107,108,112,],[7,13,18,13,30,34,18,76,80,85,30,18,80,80,85,85,85,18,]),'code':([5,],[9,]),'varstail':([6,12,],[11,26,]),'vardecl':([6,12,],[12,12,]),'idlist':([6,12,],[14,14,]),'expressions':([10,33,66,112,],[16,59,95,119,]),'statement':([10,33,66,112,],[17,17,17,17,]),'idlistTail':([15,58,],[28,91,]),'expressions_tail':([17,],[32,]),'write_statement':([20,21,],[36,38,]),'readln_statement':([22,],[39,]),'if_condition':([23,67,68,],[41,96,97,]),'expression':([23,35,37,40,48,67,68,93,],[42,61,61,61,88,42,42,61,]),'simple_expression':([23,35,37,40,48,67,68,70,71,72,73,74,75,93,],[43,43,43,43,43,43,43,98,99,100,101,102,103,43,]),'term':([23,35,37,40,48,67,68,70,71,72,73,74,75,78,79,93,],[44,44,44,44,44,44,44,44,44,44,44,44,44,104,105,44,]),'factor':([23,35,37,40,46,47,48,67,68,70,71,72,73,74,75,78,79,82,83,84,93,],[45,45,45,45,86,87,45,45,45,45,45,45,45,45,45,45,45,106,107,108,45,]),'type':([27,120,],[52,121,]),'assign_expression':([35,37,40,93,],[60,64,64,64,]),'string_statement':([37,40,93,],[63,65,111,]),'expression_tail':([43,],[69,]),'simple_expression_tail':([44,104,105,],[77,113,114,]),'term_tail':([45,106,107,108,],[81,115,116,117,]),}
 
 _lr_goto = {}
 for _k, _v in _lr_goto_items.items():
@@ -27,41 +27,64 @@ for _k, _v in _lr_goto_items.items():
 del _lr_goto_items
 _lr_productions = [
   ("S' -> file","S'",1,None,None,None),
-  ('file -> PROGRAM name vars code','file',4,'p_file','yacc.py',11),
-  ('name -> IDENTIFIER SEMICOLON','name',2,'p_name','yacc.py',19),
-  ('vars -> VAR varstail','vars',2,'p_vars','yacc.py',25),
-  ('vars -> empty','vars',1,'p_vars','yacc.py',26),
-  ('varstail -> vardecl varstail','varstail',2,'p_varstail','yacc.py',37),
-  ('varstail -> empty','varstail',1,'p_varstail','yacc.py',38),
-  ('vardecl -> idlist COLON type SEMICOLON','vardecl',4,'p_vardecl','yacc.py',50),
-  ('idlist -> IDENTIFIER idlistTail','idlist',2,'p_idlist','yacc.py',72),
-  ('idlistTail -> COMMA IDENTIFIER idlistTail','idlistTail',3,'p_idlistTail','yacc.py',80),
-  ('idlistTail -> empty','idlistTail',1,'p_idlistTail','yacc.py',81),
-  ('type -> TYPE_INTEGER','type',1,'p_type','yacc.py',92),
-  ('type -> TYPE_REAL','type',1,'p_type','yacc.py',93),
-  ('type -> BOOLEAN','type',1,'p_type','yacc.py',94),
-  ('type -> TYPE_STRING','type',1,'p_type','yacc.py',95),
-  ('type -> ARRAY LBRACKET INTEGER RBRACKET OF type','type',6,'p_type','yacc.py',96),
-  ('code -> BEGIN expressions END','code',3,'p_code','yacc.py',104),
-  ('expressions -> statement expressions','expressions',2,'p_expressions','yacc.py',109),
-  ('expressions -> empty','expressions',1,'p_expressions','yacc.py',110),
-  ('statement -> IDENTIFIER ASSIGN assign_expression SEMICOLON','statement',4,'p_statement','yacc.py',123),
-  ('statement -> WRITELN writeln_statement SEMICOLON','statement',3,'p_statement','yacc.py',124),
-  ('statement -> WRITE write_statement SEMICOLON','statement',3,'p_statement','yacc.py',125),
-  ('statement -> READLN','statement',1,'p_statement','yacc.py',126),
-  ('statement -> READ','statement',1,'p_statement','yacc.py',127),
-  ('statement -> IF','statement',1,'p_statement','yacc.py',128),
-  ('statement -> FOR','statement',1,'p_statement','yacc.py',129),
-  ('statement -> WHILE','statement',1,'p_statement','yacc.py',130),
-  ('writeln_statement -> LPAREN string_statement RPAREN','writeln_statement',3,'p_writeln_statement','yacc.py',153),
-  ('write_statement -> LPAREN string_statement RPAREN','write_statement',3,'p_write_statement','yacc.py',190),
-  ('string_statement -> assign_expression','string_statement',1,'p_string_statement','yacc.py',194),
-  ('string_statement -> assign_expression COMMA string_statement','string_statement',3,'p_string_statement','yacc.py',195),
-  ('assign_expression -> INTEGER','assign_expression',1,'p_assign_expression','yacc.py',202),
-  ('assign_expression -> REAL','assign_expression',1,'p_assign_expression','yacc.py',203),
-  ('assign_expression -> IDENTIFIER','assign_expression',1,'p_assign_expression','yacc.py',204),
-  ('assign_expression -> STRING','assign_expression',1,'p_assign_expression','yacc.py',205),
-  ('assign_expression -> expression','assign_expression',1,'p_assign_expression','yacc.py',206),
-  ('expression -> empty','expression',1,'p_expression','yacc.py',210),
-  ('empty -> <empty>','empty',0,'p_empty','yacc.py',222),
+  ('file -> PROGRAM name vars code','file',4,'p_file','yacc.py',12),
+  ('name -> IDENTIFIER SEMICOLON','name',2,'p_name','yacc.py',20),
+  ('vars -> VAR varstail','vars',2,'p_vars','yacc.py',26),
+  ('vars -> empty','vars',1,'p_vars','yacc.py',27),
+  ('varstail -> vardecl varstail','varstail',2,'p_varstail','yacc.py',38),
+  ('varstail -> empty','varstail',1,'p_varstail','yacc.py',39),
+  ('vardecl -> idlist COLON type SEMICOLON','vardecl',4,'p_vardecl','yacc.py',51),
+  ('idlist -> IDENTIFIER idlistTail','idlist',2,'p_idlist','yacc.py',73),
+  ('idlistTail -> COMMA IDENTIFIER idlistTail','idlistTail',3,'p_idlistTail','yacc.py',81),
+  ('idlistTail -> empty','idlistTail',1,'p_idlistTail','yacc.py',82),
+  ('type -> TYPE_INTEGER','type',1,'p_type','yacc.py',93),
+  ('type -> TYPE_REAL','type',1,'p_type','yacc.py',94),
+  ('type -> BOOLEAN','type',1,'p_type','yacc.py',95),
+  ('type -> TYPE_STRING','type',1,'p_type','yacc.py',96),
+  ('type -> ARRAY LBRACKET INTEGER RBRACKET OF type','type',6,'p_type','yacc.py',97),
+  ('code -> BEGIN expressions END','code',3,'p_code','yacc.py',105),
+  ('expressions -> statement expressions_tail','expressions',2,'p_expressions','yacc.py',110),
+  ('expressions -> empty','expressions',1,'p_expressions','yacc.py',111),
+  ('expressions_tail -> SEMICOLON expressions','expressions_tail',2,'p_expressions_tail','yacc.py',122),
+  ('expressions_tail -> empty','expressions_tail',1,'p_expressions_tail','yacc.py',123),
+  ('statement -> IDENTIFIER ASSIGN assign_expression','statement',3,'p_statement','yacc.py',136),
+  ('statement -> WRITELN write_statement','statement',2,'p_statement','yacc.py',137),
+  ('statement -> WRITE write_statement','statement',2,'p_statement','yacc.py',138),
+  ('statement -> READLN readln_statement','statement',2,'p_statement','yacc.py',139),
+  ('statement -> IF if_condition THEN expressions ELSE expressions','statement',6,'p_statement','yacc.py',140),
+  ('statement -> FOR','statement',1,'p_statement','yacc.py',141),
+  ('statement -> WHILE','statement',1,'p_statement','yacc.py',142),
+  ('if_condition -> expression','if_condition',1,'p_if_condition','yacc.py',179),
+  ('if_condition -> expression AND if_condition','if_condition',3,'p_if_condition','yacc.py',180),
+  ('if_condition -> expression OR if_condition','if_condition',3,'p_if_condition','yacc.py',181),
+  ('write_statement -> LPAREN string_statement RPAREN','write_statement',3,'p_write_statement','yacc.py',189),
+  ('readln_statement -> LPAREN string_statement RPAREN','readln_statement',3,'p_readln_statement','yacc.py',218),
+  ('string_statement -> assign_expression','string_statement',1,'p_string_statement','yacc.py',235),
+  ('string_statement -> assign_expression COMMA string_statement','string_statement',3,'p_string_statement','yacc.py',236),
+  ('assign_expression -> expression','assign_expression',1,'p_assign_expression','yacc.py',243),
+  ('assign_expression -> STRING','assign_expression',1,'p_assign_expression','yacc.py',244),
+  ('expression -> simple_expression expression_tail','expression',2,'p_expression','yacc.py',251),
+  ('expression_tail -> LT simple_expression','expression_tail',2,'p_expression_tail','yacc.py',290),
+  ('expression_tail -> GT simple_expression','expression_tail',2,'p_expression_tail','yacc.py',291),
+  ('expression_tail -> LE simple_expression','expression_tail',2,'p_expression_tail','yacc.py',292),
+  ('expression_tail -> GE simple_expression','expression_tail',2,'p_expression_tail','yacc.py',293),
+  ('expression_tail -> NE simple_expression','expression_tail',2,'p_expression_tail','yacc.py',294),
+  ('expression_tail -> EQUAL simple_expression','expression_tail',2,'p_expression_tail','yacc.py',295),
+  ('expression_tail -> empty','expression_tail',1,'p_expression_tail','yacc.py',296),
+  ('simple_expression -> term simple_expression_tail','simple_expression',2,'p_simple_expression','yacc.py',307),
+  ('simple_expression_tail -> PLUS term simple_expression_tail','simple_expression_tail',3,'p_simple_expression_tail','yacc.py',328),
+  ('simple_expression_tail -> MINUS term simple_expression_tail','simple_expression_tail',3,'p_simple_expression_tail','yacc.py',329),
+  ('simple_expression_tail -> empty','simple_expression_tail',1,'p_simple_expression_tail','yacc.py',330),
+  ('term -> factor term_tail','term',2,'p_term','yacc.py',358),
+  ('term_tail -> TIMES factor term_tail','term_tail',3,'p_term_tail','yacc.py',380),
+  ('term_tail -> DIVIDE factor term_tail','term_tail',3,'p_term_tail','yacc.py',381),
+  ('term_tail -> REAL_DIVIDE factor term_tail','term_tail',3,'p_term_tail','yacc.py',382),
+  ('term_tail -> empty','term_tail',1,'p_term_tail','yacc.py',383),
+  ('factor -> PLUS factor','factor',2,'p_factor','yacc.py',412),
+  ('factor -> MINUS factor','factor',2,'p_factor','yacc.py',413),
+  ('factor -> LPAREN expression RPAREN','factor',3,'p_factor','yacc.py',414),
+  ('factor -> INTEGER','factor',1,'p_factor','yacc.py',415),
+  ('factor -> REAL','factor',1,'p_factor','yacc.py',416),
+  ('factor -> IDENTIFIER','factor',1,'p_factor','yacc.py',417),
+  ('empty -> <empty>','empty',0,'p_empty','yacc.py',460),
 ]

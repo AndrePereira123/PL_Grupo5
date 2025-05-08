@@ -11,6 +11,7 @@ tokens = (
     'MINUS',
     'TIMES',
     'DIVIDE',
+    'REAL_DIVIDE',
     'LPAREN',
     'RPAREN',
     'LBRACKET',
@@ -51,7 +52,6 @@ tokens = (
     'OF',
     'WRITE',
     'WRITELN',
-    'READ',
     'READLN',
     'TRUE',
     'FALSE',
@@ -61,10 +61,14 @@ tokens = (
 )
 
 # Regras para tokens simples
+t_ASSIGN = r':='
+t_LE = r'<='
+t_GE = r'>='    ## mais longos primeiro 
+t_NE = r'<>'
+t_REAL_DIVIDE = r'/'
 t_PLUS = r'\+'
 t_MINUS = r'-'
 t_TIMES = r'\*'
-t_DIVIDE = r'/'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 t_LBRACKET = r'\['
@@ -73,13 +77,9 @@ t_SEMICOLON = r';'
 t_COLON = r':'
 t_COMMA = r','
 t_DOT = r'\.'
-t_ASSIGN = r':='
 t_EQUAL = r'='
 t_LT = r'<'
 t_GT = r'>'
-t_LE = r'<='
-t_GE = r'>='
-t_NE = r'<>'
 
 def t_PROGRAM(t):
     r'program'
@@ -192,14 +192,10 @@ def t_WRITE(t):
     return t
 
 def t_READLN(t):
-    r'readln'
+    r'readln|read'
     t.type = 'READLN'
     return t
 
-def t_READ(t):
-    r'read'
-    t.type = 'READ'
-    return t
 
 def t_TRUE(t):
     r'true'
@@ -226,6 +222,11 @@ def t_NOT(t):
     t.type = 'NOT'
     return t
 
+def t_DIVIDE(t):
+    r'div'
+    t.type = 'DIVIDE'
+    return t
+
 def t_IDENTIFIER(t):
     r'[a-zA-Z][a-zA-Z0-9_]*'
     t.type = 'IDENTIFIER'
@@ -238,19 +239,19 @@ def t_COMMENT(t):
 
 # Strings
 def t_STRING(t):
-    r'\'[^\']*\''
+    r"'([^\\\n]|(\\.))*?'"
     t.value = t.value[1:-1]  # Remover aspas
     return t
 
 
 def t_REAL(t):
-    r'[+|-]?\d+\.\d+'
+    r'\d+\.\d+'
     t.value = float(t.value)
     return t
 
 # Números
 def t_INTEGER(t):
-    r'[+|-]?\d+'
+    r'\d+'
     t.value = int(t.value)
     return t
 
@@ -274,7 +275,7 @@ lexer = lex.lex(reflags=re.IGNORECASE)
 
 # Testar o lexer com um exemplo de código Pascal
 if __name__ == "__main__":
-    file = open("programas_pascal/hello_world.pas", "r", encoding="utf-8")
+    file = open("programas_pascal/2.maior3.pas", "r", encoding="utf-8")
     data = file.read()
     file.close()
 

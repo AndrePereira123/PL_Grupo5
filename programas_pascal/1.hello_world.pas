@@ -5,12 +5,11 @@ var
     s: String;
 begin
     writeln('Ola, Mundo!', 12.23);
-    i := 10;
-    n := 12.23;
-    s := 'Ola, Mundo!';
+    ReadLn(i);
     writeln(i);
-    writeln('Ola, Mundo!');
-    writeln('Ola, Mundo!');
+    writeln('Ola, Mundo!', i);
+    i := 10;
+    writeln('Ola, Mundo!', i);
 end.
 
 
