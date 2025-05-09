@@ -1,11 +1,11 @@
 import os
+import re
 from lex import tokens
 import ply.yacc as yacc
 
-
 variaveis = {} ## chave : nome da variavel, valor : (tipo da variavel,index)
 index = 0 ## index na maquina virtual
-nivel_apontador = 0
+numero_ciclos_if = 0 ## numero de ciclos ifs aninhados
 ## index = valor na maquina virtual 
 
 def p_file(p):
@@ -49,7 +49,7 @@ def p_varstail(p):
 
 def p_vardecl(p):
     'vardecl : idlist COLON type SEMICOLON'
-    global variaveis, index, nivel_apontador
+    global variaveis, index
     p[0] = []
     for var in p[1]:
         variaveis[var] = (p[3].lower(),index) ## registar no dicionario cada variavel 
@@ -128,6 +128,7 @@ def p_expressions_tail(p):
             p[0] = []
     else: ## caso de empty
         p[0] = p[1]
+        
 
 
 #################################### statements ##########################################
@@ -137,11 +138,12 @@ def p_statement(p):
                 | WRITELN write_statement 
                 | WRITE write_statement 
                 | READLN readln_statement 
-                | IF if_condition THEN expressions ELSE expressions
+                | IF if_condition THEN if_code 
                 | FOR 
                 | WHILE ''' ## TODO implementar os outros statements
+    
     if p[2] == ":=":   
-        global variaveis, index, nivel_apontador
+        global variaveis, index
         if variaveis.get(p[1]) is not None:  ##TODO nao suporta varaiveis dentro de arrays
             tipo_guardado, index_var = variaveis[p[1]]  
         else:
@@ -173,8 +175,15 @@ def p_statement(p):
                 p[0] = linhas_calculo + ["       WRITEI\n"]
                 ##TODO ajustar boleano para ser TRUE/FALSE
 
-            
+    elif p[1].lower() == 'if':
+        global numero_ciclos_if
+        type1, code1 = p[2]
         
+        code = code1 + ["     JZ ELSE" + str(numero_ciclos_if) + "\n"]
+        code += p[4]
+        
+        numero_ciclos_if += 1
+        p[0] = code
 
     elif p[1].lower() == 'writeln':
         p[0] = p[2] + ["       WRITELN\n"]
@@ -182,14 +191,76 @@ def p_statement(p):
         p[0] = p[2]    
 
 
-def p_if_condition(p):
-    '''if_condition : expression
-                    | expression AND if_condition
-                    | expression OR if_condition'''
-    if len(p) == 2:
-        p[0] = p[1]
+def p_if_code(p):
+    '''if_code : code opt_else
+               | statement opt_else
+               | empty'''
+    if len(p) == 3:
+        global numero_ciclos_if
+        code = p[1] if p[1] is not None else [] ## codigo do if
+        codigo_else = p[2] if p[2] is not None else []
+        code += ["     JUMP ENDIF" + str(numero_ciclos_if) + "\n"] + ["ELSE" + str(numero_ciclos_if) + ":\n"] + codigo_else + ["ENDIF" + str(numero_ciclos_if) + ":\n"]
+        
+        p[0] = code
     else:
-        p[0] = p[1] + p[3]
+        p[0] = []
+
+def p_opt_else(p):
+    '''opt_else : ELSE code_or_statement
+                | empty'''
+    if len(p) == 3:
+        p[0] = p[2] if p[2] is not None else []
+    else:
+        p[0] = []
+
+def p_code_or_statement(p):
+    '''code_or_statement : code
+                         | statement'''
+    p[0] = p[1] if p[1] is not None else []
+
+
+
+def p_if_condition(p):
+    '''if_condition : expression if_condition_tail'''
+
+    if p [1][0].lower() != 'boolean':
+        raise TypeError(f"Tipo de dado inválido para condição: {p[0][0]} (esperado = boolean)")
+    if p[2] is not None:
+        if p[2][0].lower() != 'boolean':
+            raise TypeError(f"Tipo de dado inválido para condição: {p[0][0]} (esperado = boolean)")
+
+    type1, code1 = p[1]
+    type2, code2 = p[2] if p[2] is not None else (None, [])
+
+    if len(p) == 3:
+        p[0] = (type1, code1 + code2)
+
+    else:
+        p[0] = p[1]
+    
+    
+
+def p_if_condition_tail(p):
+    '''if_condition_tail : OR if_condition_tail_2
+                         | if_condition_tail_2'''
+    if len(p) == 3:                            
+        type1, code1 = p[2]
+        if type1.lower() != 'boolean':
+            raise TypeError("OR only allowed for booleans")
+        p[0] = ('boolean', code1 + ["     OR\n"])
+    else:
+        p[0] = p[1]
+
+def p_if_condition_tail_2(p):
+    '''if_condition_tail_2 : AND if_condition
+                           | empty'''
+    if len(p) == 3:                            
+        type1, code1 = p[2]
+        if type1.lower() != 'boolean':
+            raise TypeError("OR only allowed for booleans")
+        p[0] = ('boolean', code1 + ["     AND\n"])
+    else:
+        p[0] = p[1]
 
 
 def p_write_statement(p):                               
@@ -225,17 +296,17 @@ def p_readln_statement(p):
     'readln_statement : LPAREN string_statement RPAREN'
     p[0] = []
     for arg in p[2]:
-        argtype = arg[0]
-        if argtype == 'IDENTIFIER':
-            global variaveis, index
-            if variaveis.get(arg[1]) is not None:  ##TODO nao suporta varaiveis dentro de arrays
-                tipo, index_var = variaveis[arg[1]]
-                p[0] += ["     READ\n      DUP 1\n"]
-                if tipo == 'integer' or tipo == 'boolean':      ##TODO ajustar boleano para ser TRUE/FALSE
-                    p[0] += ["      ATOI\n"]
-                elif tipo == 'real':
-                    p[0] += ["      ATOF\n"]
-                p[0] += ["      STOREG " + str(index_var) + "\n       WRITES WRITELN\n"]
+        argtype, code = arg
+        match = re.search(r'LOAD\s+(-?\d+)', code[0])
+        if match:
+            global index
+            profundidade = int(match.group(1)) + index
+            p[0] += ["     READ\n      DUP 1\n"]
+            if argtype == 'integer' or argtype == 'boolean':      ##TODO ajustar boleano para ser TRUE/FALSE
+                p[0] += ["      ATOI\n"]
+            elif argtype == 'real':
+                p[0] += ["      ATOF\n"]
+            p[0] += ["      STOREG " + str(profundidade) + "\n       WRITES WRITELN\n"]
 
 
 def p_string_statement(p):
@@ -255,7 +326,32 @@ def p_assign_expression(p):
 ##################################### expression (aritmetrica e booleana) ##########################################
 
 def p_expression(p):
-    '''expression : simple_expression expression_tail'''
+    '''expression : expression OR and_expression
+                  | and_expression'''
+    if len(p) == 4:                             ## OR... (X AND Y) OR (X AND Y) ou (AND... AND X AND Y AND Z) ou (X) 
+        # Combine left and right with OR
+        type1, code1 = p[1]
+        type2, code2 = p[3]
+        if type1.lower() != 'boolean' or type2.lower() != 'boolean':
+            raise TypeError("OR only allowed for booleans")
+        p[0] = ('boolean', code1 + code2 + ["     OR\n"])
+    else:
+        p[0] = p[1]
+
+def p_and_expression(p):                                            ## (AND... AND X AND Y AND Z) ou (X) 
+    '''and_expression : and_expression AND relation_expression          
+                      | relation_expression'''
+    if len(p) == 4:
+        type1, code1 = p[1]
+        type2, code2 = p[3]
+        if type1.lower() != 'boolean' or type2.lower() != 'boolean':
+            raise TypeError("AND only allowed for booleans")
+        p[0] = ('boolean', code1 + code2 + ["     AND\n"])
+    else:
+        p[0] = p[1]
+
+def p_relation_expression(p):                                               ## (X) => (10 + 20) || (10 < (20 + 10)) etc.
+    '''relation_expression : simple_expression expression_tail'''
     if p[2] is None:
         p[0] = p[1]
     else:
@@ -303,11 +399,11 @@ def p_expression(p):
 
 
 def p_expression_tail(p):
-    '''expression_tail : LT simple_expression
-                        | GT simple_expression
-                        | LE simple_expression
-                        | GE simple_expression
-                        | NE simple_expression
+    '''expression_tail : LT simple_expression 
+                        | GT simple_expression 
+                        | LE simple_expression 
+                        | GE simple_expression 
+                        | NE simple_expression 
                         | EQUAL simple_expression
                         | empty'''
     if len(p) == 3:
@@ -353,6 +449,7 @@ def p_simple_expression_tail(p):
                 code = p[2][1] + ["     ADD\n"]
             else:
                 code = p[2][1] + ["     SUB\n"]
+
         elif type.lower() == "real":
             if p[1] == '+':
                 code = p[2][1] + ["     FADD\n"]
@@ -470,22 +567,31 @@ def p_factor(p):                        ## carrega o valor para topo da stack
 
 
 def p_error(p):
-    print("Erro sintático no input!")
+    if not p:
+        raise Exception("Erro sintático: fim inesperado do arquivo (possível bloco incompleto ou END. faltando)")
+        return
+    
+    statement_starters = {'IDENTIFIER', 'IF', 'WRITE', 'WRITELN', 'READLN', 'FOR', 'WHILE'}
+    
+    if p.type in statement_starters:
+        raise Exception(f"Erro sintático possivelmente devido à falta de ponto e vírgula antes da linha {p.lineno}: token inesperado '{p.value}' ({p.type})")
+    else:
+        raise Exception(f"Erro sintático na linha {p.lineno}: token inesperado '{p.value}' ({p.type})")
 
 def p_empty(p):
     'empty :'
     p[0] = None
 
 def reset_variaveis():
-    global variaveis, index, nivel_apontador
+    global variaveis, index, numero_ciclos_if
     variaveis = {} 
     index = 0 
-    nivel_apontador = 0
+    numero_ciclos_if = 0
 
 parser = yacc.yacc(debug=True)
 
 folder_path = 'programas_pascal'
-limite_ficheiros = 2
+limite_ficheiros = 3
 ficheiro = 0
 for file_name in os.listdir(folder_path) :
     if ficheiro < limite_ficheiros:

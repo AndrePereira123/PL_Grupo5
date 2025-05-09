@@ -2,62 +2,69 @@
      PUSHI 0
      PUSHI 0
      PUSHI 0
-     PUSHF 0.0
-     PUSHF 0.0
-     PUSHF 0.0
-     PUSHI 0
 START
-     PUSHF 10.0
-       STOREG 4
-     PUSHF 20.0
-       STOREG 5
-     PUSHF 30.0
-       STOREG 6
+     PUSHS "Introduza o primeiro número: "
+     WRITES
+     READ
+      DUP 1
+      ATOI
+      STOREG 0
+       WRITES WRITELN
+     PUSHS "Introduza o segundo número: "
+     WRITES
+     READ
+      DUP 1
+      ATOI
+      STOREG 1
+       WRITES WRITELN
+     PUSHS "Introduza o terceiro número: "
+     WRITES
+     READ
+      DUP 1
+      ATOI
+      STOREG 2
+       WRITES WRITELN
+     PUSHFP
+       LOAD -4
+     PUSHFP
+       LOAD -3
+     SUP
+     JZ ELSE2
+     PUSHFP
+       LOAD -4
      PUSHFP
        LOAD -2
-     PUSHFP
-       LOAD -3
-     FSUP
-       WRITEI
-     PUSHFP
-       LOAD -2
-     PUSHFP
-       LOAD -3
-     FSUPEQ
-       WRITEI
+     SUP
+     JZ ELSE0
      PUSHFP
        LOAD -4
-     PUSHFP
-       LOAD -3
-     FINF
-       WRITEI
-     PUSHFP
-       LOAD -4
-     PUSHFP
-       LOAD -2
-     FINFEQ
-       WRITEI
-     PUSHFP
-       LOAD -4
-     PUSHFP
-       LOAD -3
-     EQUAL
-       WRITEI
-     PUSHFP
-       LOAD -4
-     PUSHFP
-       LOAD -3
-     EQUAL
-      NOT
-       WRITEI
-     PUSHI 1020
        STOREG 3
+     JUMP ENDIF0
+ELSE0:
      PUSHFP
-       LOAD -5
-     ITOF
-       STOREG 4
+       LOAD -2
+       STOREG 3
+ENDIF0:
+     JUMP ENDIF2
+ELSE2:
      PUSHFP
-       LOAD -5
+       LOAD -3
+     PUSHFP
+       LOAD -2
+     SUP
+     JZ ELSE1
+     PUSHFP
+       LOAD -3
+       STOREG 3
+     JUMP ENDIF1
+ELSE1:
+     PUSHFP
+       LOAD -2
+       STOREG 3
+ENDIF1:
+ENDIF2:
+     PUSHFP
+       LOAD -1
        STRI
      PUSHS "O maior é: "
      CONCAT

@@ -8,6 +8,11 @@ START
      CONCAT
      WRITES
        WRITELN
+     READ
+      DUP 1
+      ATOI
+      STOREG 0
+       WRITES WRITELN
      PUSHFP
        LOAD -3
        STRI
