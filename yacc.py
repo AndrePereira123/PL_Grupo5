@@ -7,6 +7,7 @@ variaveis = {} ## chave : nome da variavel, valor : (tipo da variavel,index)
 index = 0 ## index na maquina virtual
 numero_ciclos_if = 0 ## numero de ciclos ifs 
 numero_ciclos_for = 0 ## numero de ciclos fors 
+numero_ciclos_while = 0 ## numero de ciclos whiles
 index_variavel_ciclo_for = {} ## profundidade da variavel do ciclo for
 tipo_ciclo_for = {} ## tipo de ciclo (downto ou to  )
 ## index = valor na maquina virtual 
@@ -105,9 +106,17 @@ def p_type(p):
 
 ############################## programa ##########################################
 def p_code(p):
-    'code : BEGIN expressions END'
+    'code : BEGIN expressions END_DOT'
     p[0] = ["START\n"] + p[2] + ["STOP\n"]
     print(f"Code parsed \n")
+
+def p_dotless_code(p):
+    '''dotless_code : BEGIN expressions END''' 
+    if len(p) == 4:
+        p[0] = p[2]
+    else:
+        raise Exception("Erro sintático: fim inesperado do arquivo (possível bloco incompleto ou END; em falta)")
+
 
 def p_expressions(p):
     '''expressions : statement expressions_tail
@@ -143,7 +152,7 @@ def p_statement(p):
                 | READLN readln_statement 
                 | IF if_condition THEN if_code 
                 | FOR for_condition DO for_code
-                | WHILE ''' ## TODO implementar os outros statements
+                | WHILE if_condition DO while_code''' 
     
     if p[2] == ":=":   
         global variaveis, index
@@ -170,15 +179,12 @@ def p_statement(p):
                 else:
                     raise TypeError(f"Tipo de dado inválido para atribuição: {type} (esperado = {tipo_guardado}) para variavel \"{p[1]}\"")
 
-            if tipo_guardado == 'integer' :      
+            if tipo_guardado in ['integer', 'real', 'boolean']:      
                 p[0] = linhas_calculo + ["       STOREG " + str(index_var) + "\n"]
-            elif tipo_guardado == 'real':
-                p[0] = linhas_calculo + ["       STOREG " + str(index_var) + "\n"]
-            elif tipo_guardado == 'boolean':
-                p[0] = linhas_calculo + ["       WRITEI\n"]
-                ##TODO ajustar boleano para ser TRUE/FALSE
+            else: 
+                raise TypeError(f"Tipo de dado inválido para atribuição: {type} (esperado = {tipo_guardado}) para variavel \"{p[1]}\"")
 
-    elif p[1].lower() == 'if':
+    elif p[1].lower() == 'if' :
         global numero_ciclos_if
         type1, code1 = p[2]
         
@@ -198,14 +204,48 @@ def p_statement(p):
         numero_ciclos_for += 1
         p[0] = code
 
+    elif p[1].lower() == 'while':
+        global numero_ciclos_while
+        type, code1 = p[2]
+        if type.lower() != 'boolean':
+            raise TypeError("Condição do WHILE tem de ser boolean")
+        code2 = p[4]  # assumindo 'WHILE cond DO if_code'
+
+        code = []
+        code += [f"WHILESTART{numero_ciclos_while}:\n"]
+        code += code1
+        code += [f"     JZ WHILEEND{numero_ciclos_while}\n"]
+        code += code2
+
+        
+        numero_ciclos_while += 1
+        p[0] = code
+
     elif p[1].lower() == 'writeln':
         p[0] = p[2] + ["       WRITELN\n"]
     else:
         p[0] = p[2]    
 
 
+
+def p_while_code(p):
+    '''while_code : dotless_code 
+                | statement 
+                | empty'''
+    if len(p) == 2:
+        global numero_ciclos_while
+        code = p[1] if p[1] is not None else [] 
+
+        code += [f"     JUMP WHILESTART{numero_ciclos_while}\n"]
+        code += [f"WHILEEND{numero_ciclos_while}:\n"]
+
+        p[0] = code
+    else:
+        p[0] = []
+
+
 def p_if_code(p):
-    '''if_code : code opt_else
+    '''if_code : dotless_code opt_else
                | statement opt_else
                | empty'''
     if len(p) == 3:
@@ -266,7 +306,7 @@ def p_to_expression(p):
         p[0] = []
 
 def p_for_code(p):
-    '''for_code : code 
+    '''for_code : dotless_code 
                | statement 
                | empty'''
     if len(p) == 2:
@@ -292,7 +332,7 @@ def p_opt_else(p):
         p[0] = []
 
 def p_code_or_statement(p):
-    '''code_or_statement : code
+    '''code_or_statement : dotless_code
                          | statement'''
     p[0] = p[1] if p[1] is not None else []
 
@@ -360,7 +400,6 @@ def p_write_statement(p):
                     p[0] += linhas_calculo + ["       STRF\n"]
                 elif type.lower() == 'boolean':
                     p[0] += linhas_calculo + ["       WRITEI\n"]
-                    ##TODO ajustar boleano para ser TRUE/FALSE
             
         if not first_iteration:
             p[0] += ["     CONCAT\n"]
@@ -380,7 +419,7 @@ def p_readln_statement(p):
             global index
             profundidade = int(match.group(1)) + index
             p[0] += ["     READ\n      DUP 1\n"]
-            if argtype == 'integer' or argtype == 'boolean':      ##TODO ajustar boleano para ser TRUE/FALSE
+            if argtype == 'integer' or argtype == 'boolean':     
                 p[0] += ["      ATOI\n"]
             elif argtype == 'real':
                 p[0] += ["      ATOF\n"]
@@ -397,7 +436,7 @@ def p_string_statement(p):
 
 def p_assign_expression(p):
     '''assign_expression : expression
-                         | STRING ''' ## TODO implementar expression e identifier
+                         | STRING ''' 
     p[0] = p[1]
 
 
@@ -540,7 +579,6 @@ def p_simple_expression_tail(p):
                 raise TypeError(f"Tipo de dado inválido para soma: {type} + {p[3][0]}")
             code += p[3][1]
         p[0] = (type, code)
-        print(f"Simple expression tail: {p[0]}")
 
     else:
         p[0] = p[1]
@@ -570,18 +608,21 @@ def p_term(p):
 def p_term_tail(p):
     '''term_tail : TIMES factor term_tail
                  | DIVIDE factor term_tail
+                 | MOD factor term_tail
                  | REAL_DIVIDE factor term_tail
                  | empty'''
     if len(p) == 4:
         type = p[2][0]          ## so tem divisao e multiplicacao para inteiros  ; pascal : "*"" e "div" 
-                                ##TODO // falta mod e / e * para reais
-                                ## TODO testar misturar operacoes de reais com inteiros
+                                ##TODO // falta mod 
         
         if type.lower() == "integer":
             if p[1] == '*':
                 code = p[2][1] + ["     MUL\n"]
+            elif p[1].lower() == 'mod':
+                code = p[2][1] + ["     MOD\n"]
             else:
                 code = p[2][1] + ["     DIV\n"]
+                
 
         elif type.lower() == "real":
             if p[1] == '*':
@@ -605,7 +646,9 @@ def p_factor(p):                        ## carrega o valor para topo da stack
               | LPAREN expression RPAREN
               | INTEGER
               | REAL
-              | IDENTIFIER'''
+              | IDENTIFIER
+              | TRUE
+              | FALSE'''
     if len(p) == 4:
         p[0] = p[2]
     elif len(p) == 3:
@@ -638,6 +681,10 @@ def p_factor(p):                        ## carrega o valor para topo da stack
                 tipo, index_var = variaveis[p[1]]
                 profundidade = index_var - index
                 p[0] = (tipo, ["     PUSHFP\n       LOAD " + str(profundidade) + "\n"])
+        elif p.slice[1].type == 'TRUE':
+            p[0] = ('boolean', ["     PUSHI 1\n"])
+        elif p.slice[1].type == 'FALSE':
+            p[0] = ('boolean', ["     PUSHI 0\n"])
 
 
 
@@ -661,15 +708,20 @@ def p_empty(p):
     p[0] = None
 
 def reset_variaveis():
-    global variaveis, index, numero_ciclos_if
+    global variaveis, index, numero_ciclos_if , numero_ciclos_for, numero_ciclos_while, index_variavel_ciclo_for, tipo_ciclo_for
     variaveis = {} 
     index = 0 
-    numero_ciclos_if = 0
+    numero_ciclos_if = 0 
+    numero_ciclos_for = 0 
+    numero_ciclos_while = 0 
+    index_variavel_ciclo_for = {} 
+    tipo_ciclo_for = {} 
+    
 
 parser = yacc.yacc(debug=True)
 
 folder_path = 'programas_pascal'
-limite_ficheiros = 3
+limite_ficheiros = 4
 ficheiro = 0
 for file_name in os.listdir(folder_path) :
     if ficheiro < limite_ficheiros:

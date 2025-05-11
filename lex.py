@@ -11,6 +11,7 @@ tokens = (
     'MINUS',
     'TIMES',
     'DIVIDE',
+    'MOD',
     'REAL_DIVIDE',
     'LPAREN',
     'RPAREN',
@@ -32,6 +33,7 @@ tokens = (
     'STRING',
     'PROGRAM',
     'BEGIN',
+    'END_DOT',
     'END',
     'VAR',
     'TYPE_INTEGER',
@@ -91,8 +93,13 @@ def t_BEGIN(t):
     t.type = 'BEGIN'
     return t
 
-def t_END(t):
+def t_END_DOT(t):
     r'end\.'
+    t.type = 'END_DOT'
+    return t
+
+def t_END(t):
+    r'end'
     t.type = 'END'
     return t
 
@@ -227,6 +234,11 @@ def t_DIVIDE(t):
     t.type = 'DIVIDE'
     return t
 
+def t_MOD(t):
+    r'mod'
+    t.type = 'MOD'
+    return t
+
 def t_IDENTIFIER(t):
     r'[a-zA-Z][a-zA-Z0-9_]*'
     t.type = 'IDENTIFIER'
@@ -275,7 +287,7 @@ lexer = lex.lex(reflags=re.IGNORECASE)
 
 # Testar o lexer com um exemplo de código Pascal
 if __name__ == "__main__":
-    file = open("programas_pascal/3.fatorial.pas", "r", encoding="utf-8")
+    file = open("programas_pascal/4.numero_primo.pas", "r", encoding="utf-8")
     data = file.read()
     file.close()
 
