@@ -8,6 +8,7 @@ index = 0 ## index na maquina virtual
 numero_ciclos_if = 0 ## numero de ciclos ifs 
 numero_ciclos_for = 0 ## numero de ciclos fors 
 index_variavel_ciclo_for = {} ## profundidade da variavel do ciclo for
+tipo_ciclo_for = {} ## tipo de ciclo (downto ou to  )
 ## index = valor na maquina virtual 
 
 def p_file(p):
@@ -250,14 +251,17 @@ def p_to_expression(p):
     '''to_expression : TO expression
                      | DOWNTO expression'''
     if len(p) == 3:
+        global numero_ciclos_for
         type1, code1 = p[2]
         if type1.lower() != 'integer':
             raise TypeError(f"Tipo de dado inválido para comparação com a variável do ciclo for (to var): {p[2][0]} (esperado = integer)")
         
         if p[1].lower() == 'to':
             p[0] = code1 + ["     INFEQ\n"]    ## se queremos alcancar um numero ele verifica que ainda e inferior para continuar o ciclo
+            tipo_ciclo_for[numero_ciclos_for] = ''
         else: 
             p[0] = code1 + ["     SUPEQ\n"]
+            tipo_ciclo_for[numero_ciclos_for] = '-'
     else:
         p[0] = []
 
@@ -271,7 +275,8 @@ def p_for_code(p):
 
         distancia = index_variavel_ciclo_for[numero_ciclos_for]
         profundidade = distancia + index
-        code += ["     PUSHFP\n     LOAD" + str(distancia) + "\n     PUSHI 1\n     ADD\n     STOREG " + str(profundidade) + "\n"]
+        code += ["     PUSHFP\n     LOAD" + str(distancia) + f"\n     PUSHI {tipo_ciclo_for[numero_ciclos_for]}1\n     ADD\n     STOREG " + str(profundidade) + "\n"]
+                                                           # o tipo de ciclo for guarda um - se o ciclo for "for downto"
         code += ["     JUMP FORSTART" + str(numero_ciclos_for) + "\n"] + ["FOREND" + str(numero_ciclos_for) + ":\n"]
         
         p[0] = code

@@ -141,6 +141,11 @@ def t_WHILE(t):
     t.type = 'WHILE'
     return t
 
+def t_DOWNTO(t):
+    r'downto'
+    t.type = 'DOWNTO'
+    return t
+
 def t_DO(t):
     r'do'
     t.type = 'DO'
@@ -154,11 +159,6 @@ def t_FOR(t):
 def t_TO(t):
     r'to'
     t.type = 'TO'
-    return t
-
-def t_DOWNTO(t):
-    r'downto'
-    t.type = 'DOWNTO'
     return t
 
 def t_FUNCTION(t):
@@ -275,7 +275,7 @@ lexer = lex.lex(reflags=re.IGNORECASE)
 
 # Testar o lexer com um exemplo de código Pascal
 if __name__ == "__main__":
-    file = open("programas_pascal/2.maior3.pas", "r", encoding="utf-8")
+    file = open("programas_pascal/3.fatorial.pas", "r", encoding="utf-8")
     data = file.read()
     file.close()
 
