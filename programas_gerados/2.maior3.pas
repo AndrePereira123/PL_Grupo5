@@ -29,13 +29,13 @@ START
      PUSHFP
        LOAD -3
      SUP
-     JZ ELSE2
+JZ ELSE2
      PUSHFP
        LOAD -4
      PUSHFP
        LOAD -2
      SUP
-     JZ ELSE0
+JZ ELSE0
      PUSHFP
        LOAD -4
        STOREG 3
@@ -52,7 +52,7 @@ ELSE2:
      PUSHFP
        LOAD -2
      SUP
-     JZ ELSE1
+JZ ELSE1
      PUSHFP
        LOAD -3
        STOREG 3

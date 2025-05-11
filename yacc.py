@@ -5,7 +5,9 @@ import ply.yacc as yacc
 
 variaveis = {} ## chave : nome da variavel, valor : (tipo da variavel,index)
 index = 0 ## index na maquina virtual
-numero_ciclos_if = 0 ## numero de ciclos ifs aninhados
+numero_ciclos_if = 0 ## numero de ciclos ifs 
+numero_ciclos_for = 0 ## numero de ciclos fors 
+index_variavel_ciclo_for = {} ## profundidade da variavel do ciclo for
 ## index = valor na maquina virtual 
 
 def p_file(p):
@@ -139,7 +141,7 @@ def p_statement(p):
                 | WRITE write_statement 
                 | READLN readln_statement 
                 | IF if_condition THEN if_code 
-                | FOR 
+                | FOR for_condition DO for_code
                 | WHILE ''' ## TODO implementar os outros statements
     
     if p[2] == ":=":   
@@ -179,10 +181,20 @@ def p_statement(p):
         global numero_ciclos_if
         type1, code1 = p[2]
         
-        code = code1 + ["     JZ ELSE" + str(numero_ciclos_if) + "\n"]
+        code = code1 + ["JZ ELSE" + str(numero_ciclos_if) + "\n"]
         code += p[4]
         
         numero_ciclos_if += 1
+        p[0] = code
+
+    elif p[1].lower() == 'for':
+        global numero_ciclos_for
+        type1, code1 = p[2]
+        
+        code = code1 + ["JZ FOREND" + str(numero_ciclos_for) + "\n"]
+        code += p[4]
+        
+        numero_ciclos_for += 1
         p[0] = code
 
     elif p[1].lower() == 'writeln':
@@ -200,6 +212,67 @@ def p_if_code(p):
         code = p[1] if p[1] is not None else [] ## codigo do if
         codigo_else = p[2] if p[2] is not None else []
         code += ["     JUMP ENDIF" + str(numero_ciclos_if) + "\n"] + ["ELSE" + str(numero_ciclos_if) + ":\n"] + codigo_else + ["ENDIF" + str(numero_ciclos_if) + ":\n"]
+        
+        p[0] = code
+    else:
+        p[0] = []
+
+def p_for_condition(p):
+    '''for_condition : expression ASSIGN expression to_expression'''  ## x := 0 to 10       ou       x := y+2 to z*2 
+
+
+    type1, code1 = p[1]  ## so fazemos para verificar q e inteiro e para saber index para guardar novo valor usado no ciclo
+    if type1.lower() != 'integer':
+        raise TypeError(f"Tipo de dado inválido para acolher ciclo for (var :=) : {p[1][0]} (esperado = integer)")
+    type2, code2 = p[3]
+    if type2.lower() != 'integer':
+        raise TypeError(f"Tipo de dado inválido para atribuir a variavel do ciclo for (:= var): {p[3][0]} (esperado = integer)")
+
+    code3 = p[4] 
+
+    if len(p) == 5:
+        global numero_ciclos_for , index_variavel_ciclo_for, index
+        match = re.search(r'LOAD\s+(-?\d+)', code1[0])
+        if match:
+            distancia = int(match.group(1))  ## valor negativo (para LOADs) , conta de cima para baixo
+            profundidade = distancia + index  ## valor positivo (relativo a variaveis na stack inicial) conta de baixo para cima
+
+            index_variavel_ciclo_for[numero_ciclos_for] = distancia
+
+            p[0] = (type1, code2 + ["      STOREG " + str(profundidade) + "\n"]  # guardamos  o valor inicial da variavel do ciclo for na stack
+                                + ["FORSTART" + str(numero_ciclos_for) + ":\n"]    # comecamos o ciclo
+                                + ["     PUSHFP\n      LOAD " + str(distancia) + "\n"] + code3) # comparacao entre o valor da variavel e o valor final a alcancar
+                                
+    else:
+        p[0] = p[1]
+
+def p_to_expression(p):
+    '''to_expression : TO expression
+                     | DOWNTO expression'''
+    if len(p) == 3:
+        type1, code1 = p[2]
+        if type1.lower() != 'integer':
+            raise TypeError(f"Tipo de dado inválido para comparação com a variável do ciclo for (to var): {p[2][0]} (esperado = integer)")
+        
+        if p[1].lower() == 'to':
+            p[0] = code1 + ["     INFEQ\n"]    ## se queremos alcancar um numero ele verifica que ainda e inferior para continuar o ciclo
+        else: 
+            p[0] = code1 + ["     SUPEQ\n"]
+    else:
+        p[0] = []
+
+def p_for_code(p):
+    '''for_code : code 
+               | statement 
+               | empty'''
+    if len(p) == 2:
+        global numero_ciclos_for, index_variavel_ciclo_for , index
+        code = p[1] if p[1] is not None else [] 
+
+        distancia = index_variavel_ciclo_for[numero_ciclos_for]
+        profundidade = distancia + index
+        code += ["     PUSHFP\n     LOAD" + str(distancia) + "\n     PUSHI 1\n     ADD\n     STOREG " + str(profundidade) + "\n"]
+        code += ["     JUMP FORSTART" + str(numero_ciclos_for) + "\n"] + ["FOREND" + str(numero_ciclos_for) + ":\n"]
         
         p[0] = code
     else:
@@ -224,10 +297,10 @@ def p_if_condition(p):
     '''if_condition : expression if_condition_tail'''
 
     if p [1][0].lower() != 'boolean':
-        raise TypeError(f"Tipo de dado inválido para condição: {p[0][0]} (esperado = boolean)")
+        raise TypeError(f"Tipo de dado inválido para condição: {p[1][0]} (esperado = boolean)")
     if p[2] is not None:
         if p[2][0].lower() != 'boolean':
-            raise TypeError(f"Tipo de dado inválido para condição: {p[0][0]} (esperado = boolean)")
+            raise TypeError(f"Tipo de dado inválido para condição: {p[2][0]} (esperado = boolean)")
 
     type1, code1 = p[1]
     type2, code2 = p[2] if p[2] is not None else (None, [])
@@ -277,11 +350,11 @@ def p_write_statement(p):
                 type, linhas_calculo = expressao_ou_string
                 
                 if type.lower() == 'integer' :      
-                    p[0] = linhas_calculo + ["       STRI\n"]
+                    p[0] += linhas_calculo + ["       STRI\n"]
                 elif type.lower() == 'real':
-                    p[0] = linhas_calculo + ["       STRF\n"]
+                    p[0] += linhas_calculo + ["       STRF\n"]
                 elif type.lower() == 'boolean':
-                    p[0] = linhas_calculo + ["       WRITEI\n"]
+                    p[0] += linhas_calculo + ["       WRITEI\n"]
                     ##TODO ajustar boleano para ser TRUE/FALSE
             
         if not first_iteration:
