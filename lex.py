@@ -287,7 +287,7 @@ lexer = lex.lex(reflags=re.IGNORECASE)
 
 # Testar o lexer com um exemplo de código Pascal
 if __name__ == "__main__":
-    file = open("programas_pascal/4.numero_primo.pas", "r", encoding="utf-8")
+    file = open("programas_pascal/5.soma_lista.pas", "r", encoding="utf-8")
     data = file.read()
     file.close()
 

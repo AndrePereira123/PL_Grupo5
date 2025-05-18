@@ -5,6 +5,7 @@ import ply.yacc as yacc
 
 variaveis = {} ## chave : nome da variavel, valor : (tipo da variavel,index)
 index = 0 ## index na maquina virtual
+struct_index = 0 # index das estruturas
 numero_ciclos_if = 0 ## numero de ciclos ifs 
 numero_ciclos_for = 0 ## numero de ciclos fors 
 numero_ciclos_while = 0 ## numero de ciclos whiles
@@ -53,23 +54,32 @@ def p_varstail(p):
 
 def p_vardecl(p):
     'vardecl : idlist COLON type SEMICOLON'
-    global variaveis, index
+    global variaveis, index, struct_index
     p[0] = []
     for var in p[1]:
-        variaveis[var] = (p[3].lower(),index) ## registar no dicionario cada variavel 
-        index += 1 
-        p[3] = p[3].lower()
-        if p[3] == 'integer' or p[3] == 'boolean':
-            p[0] += ["     PUSHI 0\n"]
+        if (isinstance(p[3], dict)) and p[3].get('type') == 'ARRAY':
+            menor, maior = p[3]['size']
+            elements_type = p[3]['element_type']
+            tamanho = maior - menor + 1
+            variaveis[var] = ('array', (menor, maior, tamanho, struct_index, elements_type))
+            struct_index += 1
+            index += 1
 
-        elif p[3] == 'real':
-            p[0] += ["     PUSHF 0.0\n"]
+            p[0] += [f"     ALLOC {tamanho}\n"]
+            
+        else:
+            variaveis[var] = (p[3].lower(),index) ## registar no dicionario cada variavel 
+            index += 1 
+            p[3] = p[3].lower()
+            if p[3] == 'integer' or p[3] == 'boolean':
+                p[0] += ["     PUSHI 0\n"]
 
-        elif p[3] == 'string':
-            p[0] += ["     PUSHS \"\"\n"]
+            elif p[3] == 'real':
+                p[0] += ["     PUSHF 0.0\n"]
 
-        elif p[3] == 'array':
-            pass  ## TODO: array
+            elif p[3] == 'string':
+                p[0] += ["     PUSHS \"\"\n"]
+
     
     
 
@@ -98,11 +108,22 @@ def p_type(p):
            | TYPE_REAL
            | BOOLEAN
            | TYPE_STRING
-           | ARRAY LBRACKET INTEGER RBRACKET OF type'''
+           | ARRAY LBRACKET arraytypes RBRACKET OF type'''
     if len(p) == 2:  
         p[0] = p[1]
     else:  
         p[0] = {'type': 'ARRAY', 'size': p[3], 'element_type': p[6]}
+
+def p_array_types(p):
+    '''arraytypes : INTEGER
+                  | INTEGER DOT DOT INTEGER  
+    '''
+    if (len(p) != 2):
+        p[0] = (int(p[1]), int(p[4])) # apenas arrays do tipo inteiro
+
+    else:
+        p[0] = int(p[1])
+
 
 ############################## programa ##########################################
 def p_code(p):
@@ -147,6 +168,7 @@ def p_expressions_tail(p):
 
 def p_statement(p):
     '''statement : IDENTIFIER ASSIGN assign_expression  
+                | IDENTIFIER LBRACKET expression RBRACKET ASSIGN assign_expression
                 | WRITELN write_statement 
                 | WRITE write_statement 
                 | READLN readln_statement 
@@ -183,6 +205,37 @@ def p_statement(p):
                 p[0] = linhas_calculo + ["       STOREG " + str(index_var) + "\n"]
             else: 
                 raise TypeError(f"Tipo de dado inválido para atribuição: {type} (esperado = {tipo_guardado}) para variavel \"{p[1]}\"")
+
+    elif len(p) == 7 and p[2] == "[" and p[4] == "]" and p[5] == ":=":
+        if variaveis.get(p[1]) is not None:
+            # ('array', (menor, maior, tamanho, struct_index))
+            tipo_guardado, dados = variaveis[p[1]]  
+
+            menor, maior, tamanho, struct_index, elements_type = dados
+
+            actual_type, command = p[6]
+
+            if (actual_type.lower() == elements_type):
+                print(p[3])
+
+                commands = []
+                commands += [f'     PUSHST {struct_index}\n']
+                commands += p[3][1]
+                commands += [f'     PUSHI 1\n     SUB\n'] # por causa dos indices
+                commands += command
+                commands += ['     STOREN\n']
+
+                # inserir o valor que queremos dar bind
+                p[0] = commands
+
+                # isto n pode ser pq é uma expression
+                #raise NameError(f"Índice out of bonds: {p[1]}")
+                
+            else:
+                raise NameError(f"Variável do tipo: {actual_type.lower()}. Deveria ser do tipo {elements_type}")
+        else:
+            raise NameError(f"Variável não declarada: {p[1]}")
+        pass
 
     elif p[1].lower() == 'if' :
         global numero_ciclos_if
@@ -393,13 +446,26 @@ def p_write_statement(p):
         
         else:
                 type, linhas_calculo = expressao_ou_string
+
+                if type == 'array':
+                    
+                    commands, element_type = linhas_calculo
+                    p[0] += commands
+                    p[0] += [f"     LOADN\n"]
+                    if element_type.lower() == 'integer' :      
+                        p[0] += ["       STRI\n"]
+                    elif element_type.lower() == 'real':
+                        p[0] += ["       STRF\n"]
+                    elif element_type.lower() == 'boolean':
+                        p[0] += ["       WRITEI\n"]
                 
-                if type.lower() == 'integer' :      
-                    p[0] += linhas_calculo + ["       STRI\n"]
-                elif type.lower() == 'real':
-                    p[0] += linhas_calculo + ["       STRF\n"]
-                elif type.lower() == 'boolean':
-                    p[0] += linhas_calculo + ["       WRITEI\n"]
+                else:
+                    if type.lower() == 'integer' :      
+                        p[0] += linhas_calculo + ["       STRI\n"]
+                    elif type.lower() == 'real':
+                        p[0] += linhas_calculo + ["       STRF\n"]
+                    elif type.lower() == 'boolean':
+                        p[0] += linhas_calculo + ["       WRITEI\n"]
             
         if not first_iteration:
             p[0] += ["     CONCAT\n"]
@@ -414,16 +480,31 @@ def p_readln_statement(p):
     p[0] = []
     for arg in p[2]:
         argtype, code = arg
-        match = re.search(r'LOAD\s+(-?\d+)', code[0])
-        if match:
+
+        if (argtype == 'array'):
+            commands, tipo_elemento = code
             global index
-            profundidade = int(match.group(1)) + index
-            p[0] += ["     READ\n      DUP 1\n"]
-            if argtype == 'integer' or argtype == 'boolean':     
+            p[0] += commands
+            p[0] += ["     READ\n"]
+            if tipo_elemento == 'integer' or tipo_elemento == 'boolean':     
                 p[0] += ["      ATOI\n"]
-            elif argtype == 'real':
+            elif tipo_elemento == 'real':
                 p[0] += ["      ATOF\n"]
-            p[0] += ["      STOREG " + str(profundidade) + "\n       WRITES WRITELN\n"]
+
+            p[0] += ["      STOREN\n"]
+            
+
+        else:
+            match = re.search(r'LOAD\s+(-?\d+)', code[0])
+            if match:
+                global index
+                profundidade = int(match.group(1)) + index
+                p[0] += ["     READ\n      DUP 1\n"]
+                if argtype == 'integer' or argtype == 'boolean':     
+                    p[0] += ["      ATOI\n"]
+                elif argtype == 'real':
+                    p[0] += ["      ATOF\n"]
+                p[0] += ["      STOREG " + str(profundidade) + "\n       WRITES WRITELN\n"]
 
 
 def p_string_statement(p):
@@ -572,6 +653,29 @@ def p_simple_expression_tail(p):
                 code = p[2][1] + ["     FADD\n"]
             else:
                 code = p[2][1] + ["     FSUB\n"]
+
+
+        # verificar
+        elif type.lower() == "array":
+            array_data = p[2][1]
+            commands, element_type = array_data
+
+            code = commands
+            code += ["      LOADN\n"] 
+
+            if element_type.lower() == "integer":
+                if p[1] == '+':
+                    code += ["     ADD\n"]
+                else:
+                    code = ["     SUB\n"]
+
+            elif element_type.lower() == "real":
+                if p[1] == '+':
+                    code = ["     FADD\n"]
+                else:
+                    code = ["     FSUB\n"]
+            
+            type = element_type.lower()       
         
 
         if p[3] is not None:
@@ -579,6 +683,7 @@ def p_simple_expression_tail(p):
                 raise TypeError(f"Tipo de dado inválido para soma: {type} + {p[3][0]}")
             code += p[3][1]
         p[0] = (type, code)
+
 
     else:
         p[0] = p[1]
@@ -647,9 +752,32 @@ def p_factor(p):                        ## carrega o valor para topo da stack
               | INTEGER
               | REAL
               | IDENTIFIER
+              | IDENTIFIER LBRACKET expression RBRACKET
               | TRUE
               | FALSE'''
-    if len(p) == 4:
+    
+    global variaveis, index
+    print(p[1])
+    if len(p) == 5 and p.slice[1].type == 'IDENTIFIER' and p[3][0].lower() == 'integer':
+        var = variaveis.get(p[1])
+        if var is None or var[0] != 'array':
+            raise NameError(f'Variável não declarada ou não é array: {p[1]}')
+        
+        menor, maior, tamanho, struct_index, tipo_elemento = var[1]
+
+        tipo_indice, commands_indice = p[3]
+
+        if tipo_indice.lower() != 'integer':
+            raise TypeError("Índice de array deve ser inteiro")
+
+        commands = []
+        commands += [f'      PUSHST {struct_index}\n']
+        commands += commands_indice
+        commands += ['      PUSHI 1\n       SUB\n']
+
+        p[0] = ('array', (commands, tipo_elemento))
+
+    elif len(p) == 4:
         p[0] = p[2]
     elif len(p) == 3:
         tipo, code = p[2]
@@ -676,7 +804,6 @@ def p_factor(p):                        ## carrega o valor para topo da stack
         elif p.slice[1].type == 'REAL':
             p[0] = (p.slice[1].type,["     PUSHF " + str(p[1]) + "\n"])
         elif p.slice[1].type == 'IDENTIFIER':
-            global variaveis, index
             if variaveis.get(p[1]) is not None:  ##TODO nao suporta varaiveis dentro de arrays
                 tipo, index_var = variaveis[p[1]]
                 profundidade = index_var - index
@@ -721,7 +848,7 @@ def reset_variaveis():
 parser = yacc.yacc(debug=True)
 
 folder_path = 'programas_pascal'
-limite_ficheiros = 4
+limite_ficheiros = 5
 ficheiro = 0
 for file_name in os.listdir(folder_path) :
     if ficheiro < limite_ficheiros:
