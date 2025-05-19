@@ -314,7 +314,6 @@ def p_if_code(p):
 def p_for_condition(p):
     '''for_condition : expression ASSIGN expression to_expression'''  ## x := 0 to 10       ou       x := y+2 to z*2 
 
-
     type1, code1 = p[1]  ## so fazemos para verificar q e inteiro e para saber index para guardar novo valor usado no ciclo
     if type1.lower() != 'integer':
         raise TypeError(f"Tipo de dado inválido para acolher ciclo for (var :=) : {p[1][0]} (esperado = integer)")
@@ -751,31 +750,44 @@ def p_factor(p):                        ## carrega o valor para topo da stack
               | LPAREN expression RPAREN
               | INTEGER
               | REAL
-              | IDENTIFIER
-              | IDENTIFIER LBRACKET expression RBRACKET
+              | IDENTIFIER identifier_expression
               | TRUE
               | FALSE'''
     
     global variaveis, index
-    print(p[1])
-    if len(p) == 5 and p.slice[1].type == 'IDENTIFIER' and p[3][0].lower() == 'integer':
-        var = variaveis.get(p[1])
-        if var is None or var[0] != 'array':
-            raise NameError(f'Variável não declarada ou não é array: {p[1]}')
-        
-        menor, maior, tamanho, struct_index, tipo_elemento = var[1]
+    if len(p) == 3 and p.slice[1].type == 'IDENTIFIER':
+        if p[2] is not None:
 
-        tipo_indice, commands_indice = p[3]
+            print(variaveis[p[1]])
 
-        if tipo_indice.lower() != 'integer':
-            raise TypeError("Índice de array deve ser inteiro")
+            tipo, (menor, maior, tamanho, struct_index, elements_type) = variaveis[p[1]]
 
-        commands = []
-        commands += [f'      PUSHST {struct_index}\n']
-        commands += commands_indice
-        commands += ['      PUSHI 1\n       SUB\n']
+            if tipo != 'array':
+                raise TypeError(f'A variável {p[1]} deveria ser um array.')
 
-        p[0] = ('array', (commands, tipo_elemento))
+
+
+            commands = []
+            commands += [f'     PUSHST {struct_index}\n']
+            commands += p[2][1][0]
+
+            p[0] = ('array', (commands, elements_type))
+
+
+
+        else: # não é array
+            if variaveis.get(p[1]) is not None:  ##TODO nao suporta varaiveis dentro de arrays
+                tipo, index_var = variaveis[p[1]]
+                print(index_var)
+                profundidade = index_var - index
+                p[0] = (tipo, ["     PUSHFP\n       LOAD " + str(profundidade) + "\n"])
+            elif p.slice[1].type == 'TRUE':
+                p[0] = ('boolean', ["     PUSHI 1\n"])
+            elif p.slice[1].type == 'FALSE':
+                p[0] = ('boolean', ["     PUSHI 0\n"])
+
+    
+
 
     elif len(p) == 4:
         p[0] = p[2]
@@ -813,8 +825,22 @@ def p_factor(p):                        ## carrega o valor para topo da stack
         elif p.slice[1].type == 'FALSE':
             p[0] = ('boolean', ["     PUSHI 0\n"])
 
+def p_identifier_expression(p):
+    '''
+    identifier_expression : LBRACKET expression RBRACKET
+                          | empty
+    '''
+    global variaveis, index
+    if p[1] is not None:
+        if len(p) == 4 and p[2][0].lower() == 'integer': ##TODO arrays de chars            
+            tipo_indice, commands_indice = p[2]
+            
+            if tipo_indice.lower() != 'integer':
+                raise TypeError("Índice de array deve ser inteiro")
 
-
+            p[0] = ('array', (commands_indice + ["      PUSHI 1\n       SUB\n"], p[2][0].lower()))
+    else:
+        p[0] = None
 
 
 
