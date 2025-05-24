@@ -6,6 +6,7 @@ import ply.yacc as yacc
 STRING_MAX_SIZE = 256
 
 variaveis = {} ## chave : nome da variavel, valor : (tipo da variavel,index)
+label_index = 0 # index da label de forma a ter nome único
 index = 0 ## index na maquina virtual
 struct_index = 0 # index das estruturas
 numero_ciclos_if = 0 ## numero de ciclos ifs 
@@ -499,16 +500,42 @@ def p_write_statement(p):
 
         # string guardada
         elif type.lower() == 'string':
-            global variaveis
+            global variaveis, label_index
             tipo_guardado, (menor, maior, tamanho, struct_index, elements_type) = variaveis[linhas_calculo]
-            
-            for i in range(menor, menor + tamanho):
-                p[0] += [
-                    f'     PUSHST {struct_index}\n',
-                    f'     PUSHI {i - menor}\n', 
-                    '     LOADN\n',
-                    '     WRITECHR\n'
-                ]
+            label_start = f"STR{label_index}PRINTSTART"
+            label_end = f"STR{label_index}PRINTEND"
+            label_index += 1
+
+            p[0] += [
+                f"     PUSHST {struct_index}\n", 
+                "     DUP 1\n",
+                "     PUSHI 0\n",
+                "     LOADN\n",                 
+                "     STOREL 0\n",    
+                "     PUSHI 0\n",           
+                "     STOREL 1\n",          
+
+                f"{label_start}:\n",
+                "     PUSHL 1\n",                
+                "     PUSHL 0\n",            
+                "     INF\n",                   
+                f"     JZ {label_end}\n",
+
+                f"     PUSHST {struct_index}\n",
+                "     PUSHL 1\n",                
+                "     PUSHI 1\n",
+                "     ADD\n",              
+                "     LOADN\n",         
+                "     WRITECHR\n",
+
+                "     PUSHL 1\n",
+                "     PUSHI 1\n",
+                "     ADD\n",
+                "     STOREL 1\n",
+                f"     JUMP {label_start}\n",
+                f"{label_end}:\n",
+                "           POP 2\n"
+            ]
 
             
             check = True
@@ -553,8 +580,48 @@ def p_readln_statement(p):
             p[0] += ["      STOREN\n"]
 
         elif (argtype == 'string'):
-            p[0] += ["      READ\n"]
-            p[0] += ["      DUP 1\n"]
+            global variaveis, label_index
+            tipo_guardado, (menor, maior, tamanho, struct_index, elements_type) = variaveis[code]
+            label_start = f"STR{label_index}START"
+            label_end = f"STR{label_index}END"
+            label_index += 1
+            # Lê a string e duplica o endereço
+            p[0] += [
+                "     READ\n",              
+                "     DUP 1\n",            
+                "     STRLEN\n",            
+                f"     DUP 2\n",
+                f"     PUSHST {struct_index}\n",
+                "     SWAP\n",
+                "     PUSHI 0\n",
+                "     SWAP\n",
+                "     STOREN\n"  
+                 "     PUSHI 256\n",
+                 "     INF\n",               
+                f"     JZ {label_end}\n",   
+                f"     PUSHI 0\n",           
+                f"{label_start}:\n",
+                "     DUP 1\n",             
+                f"     PUSHST {struct_index}\n",          
+                "     PUSHL 0\n",           
+                "     PUSHL 2\n",
+                "     CHARAT\n", 
+                "     PUSHL 2\n",
+                "     PUSHI 1\n",
+                "     ADD\n",         
+                "     SWAP\n",              
+                "     STOREN\n",
+                "     PUSHI 1\n",
+                "     ADD\n",               
+                "     DUP 1\n",          
+                "     STOREL 2\n",
+                "     PUSHL 1\n", 
+                "     INF\n",               
+                f"     JZ {label_end}\n",  
+                f"     JUMP {label_start}\n",
+                f"{label_end}:\n",
+                "     POP 3\n"              
+            ]
             
 
         else:
@@ -928,12 +995,13 @@ def p_empty(p):
     p[0] = None
 
 def reset_variaveis():
-    global variaveis, index, numero_ciclos_if , numero_ciclos_for, numero_ciclos_while, index_variavel_ciclo_for, tipo_ciclo_for, struct_index
+    global variaveis, index, numero_ciclos_if , numero_ciclos_for, numero_ciclos_while, index_variavel_ciclo_for, tipo_ciclo_for, struct_index, label_index
     variaveis = {} 
     index = 0 
     numero_ciclos_if = 0 
     numero_ciclos_for = 0 
     numero_ciclos_while = 0 
+    label_index = 0
     index_variavel_ciclo_for = {} 
     tipo_ciclo_for = {} 
     struct_index = 0
