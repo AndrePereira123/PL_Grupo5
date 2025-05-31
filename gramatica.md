@@ -1,83 +1,193 @@
-program HelloWorld;
-begin
-    writeln('Ola, Mundo!');
-end.
+# Gramática Pascal - PL 2025 - Grupo 5
 
-LL(1) - Transformed Grammar
+## Regras de Produção
 
+### **Estrutura Principal**
+```
+file → PROGRAM name vars code
 
-file : name vars program
+name → IDENTIFIER SEMICOLON
+```
 
-name : IDENTIFIER SEMICOLON
+### **Declaração de Variáveis**
+```
+vars → VAR varstail
+     | empty
 
-vars : VAR varstail
-     | 
+varstail → vardecl varstail
+         | empty
 
-varstail : vardecl varstail
-         | 
+vardecl → idlist COLON type SEMICOLON
 
-vardecl : idlist COLON type SEMICOLON
+idlist → IDENTIFIER idlistTail
 
-idlist : IDENTIFIER idlistTail
+idlistTail → COMMA IDENTIFIER idlistTail
+           | empty
+```
 
-idlistTail : COMMA idlist
-           | 
-
-type : INTEGER
+### **Tipos de Dados**
+```
+type → TYPE_INTEGER
      | TYPE_REAL
      | BOOLEAN
-     | STRING
-     | ARRAY LBRACKET NUMBER RBRACKET OF type
+     | TYPE_STRING
+     | ARRAY LBRACKET arraytypes RBRACKET OF type
 
-program : BEGIN expressions END
+arraytypes → INTEGER
+           | INTEGER DOT DOT INTEGER
+```
 
-expressions : statement expressions_tail
-            | 
+### **Estrutura do Programa**
+```
+code → BEGIN expressions END_DOT
 
-expressions_tail : SEMICOLON expressions
-                 |
+dotless_code → BEGIN expressions END
 
-statement : WRITELN writeln_statement SEMICOLON
-          | WRITE write_statement SEMICOLON
-          | READLN readln_statement SEMICOLON
-          | IF 
-          | FOR 
-          | WHILE
+expressions → statement expressions_tail
+            | empty
 
+expressions_tail → SEMICOLON expressions
+                 | empty
+```
 
-gramatica para write(s)-------------------
+### **Statements (Solução Dangling Else)**
+```
+statement → open_statement
+          | closed_statement
 
-tipos suportados:
-Strings (e.g., writeln('Hello');)
-Numbers (e.g., writeln(42);)
-Variables (e.g., writeln(a);)
-Expressions (e.g., writeln(1 + 2);)
-Multiple values separated by commas (e.g., writeln('Sum:', 1 + 2);)
+open_statement → IF if_condition THEN code_or_statement
+               | IF if_condition THEN code_or_statement ELSE open_statement
+               | WHILE if_condition DO open_statement
+               | FOR for_condition DO open_statement
 
--------------------------------------------------------
--------------------------------------------------------
+closed_statement → IDENTIFIER identifier_assign_expression
+                 | WRITELN write_statement
+                 | WRITE write_statement
+                 | READLN readln_statement
+                 | IF if_condition THEN code_or_statement ELSE code_or_statement
+                 | FOR for_condition DO code_or_statement
+                 | WHILE if_condition DO code_or_statement
+```
 
-writeln_statement : LPAREN string_statement RPAREN
+### **Atribuições e Condições**
+```
+identifier_assign_expression → ASSIGN assign_expression
+                             | LBRACKET expression RBRACKET ASSIGN assign_expression
 
-write_statement : LPAREN string_statement RPAREN
+for_condition → expression ASSIGN expression to_expression
 
--------------------------------------------------------
+to_expression → TO expression
+              | DOWNTO expression
 
-readln_statement : LPAREN  string_statement  RPAREN
+code_or_statement → dotless_code
+                  | closed_statement
 
--------------------------------------------------------
+if_condition → expression
+```
 
-string_statement : string_argument
-                 | string_argument COMMA string_statement
+### **I/O Statements**
+```
+write_statement → LPAREN string_statement RPAREN
 
-string_argument : STRING
-                | IDENTIFIER  
-                | NUMBER
-                | expression
+readln_statement → LPAREN string_statement RPAREN
 
--------------------------------------------------------
--------------------------------------------------------
+string_statement → assign_expression
+                 | assign_expression COMMA string_statement
 
+assign_expression → expression
+```
 
+### **Expressões Booleanas e Aritméticas**
+```
+expression → expression OR and_expression
+           | and_expression
 
+and_expression → and_expression AND relation_expression
+               | relation_expression
 
+relation_expression → simple_expression expression_tail
+                    | NOT simple_expression expression_tail
+
+expression_tail → LT simple_expression
+                | GT simple_expression
+                | LE simple_expression
+                | GE simple_expression
+                | NE simple_expression
+                | EQUAL simple_expression
+                | empty
+```
+
+### **Expressões Aritméticas**
+```
+simple_expression → term simple_expression_tail
+
+simple_expression_tail → PLUS term simple_expression_tail
+                       | MINUS term simple_expression_tail
+                       | empty
+
+term → factor term_tail
+
+term_tail → TIMES factor term_tail
+          | DIVIDE factor term_tail
+          | MOD factor term_tail
+          | REAL_DIVIDE factor term_tail
+          | empty
+```
+
+### **Fatores**
+```
+factor → PLUS factor
+       | MINUS factor
+       | LPAREN expression RPAREN
+       | INTEGER
+       | REAL
+       | IDENTIFIER identifier_expression
+       | IDENTIFIER length_expression
+       | TRUE
+       | STRING
+       | FALSE
+```
+
+### **Acesso a Arrays e funçao length**
+```
+length_expression → LPAREN IDENTIFIER RPAREN
+
+identifier_expression → LBRACKET expression RBRACKET
+                      | empty
+```
+
+### **Regra Vazia**
+```
+empty → ε
+```
+
+## **Características Especiais da Gramática**
+
+### **1. Solução para Dangling Else**
+- **open_statement**: Statements incompletos que podem causar ambiguidade
+- **closed_statement**: Statements completos e bem definidos
+
+### **2. Precedência de Operadores (da maior para menor)**
+1. **Unário**: `+`, `-`, `NOT`
+2. **Multiplicativo**: `*`, `div`, `mod`, `/`
+3. **Aditivo**: `+`, `-`
+4. **Relacional**: `=`, `<>`, `<`, `>`, `<=`, `>=`
+5. **Lógico AND**: `AND`
+6. **Lógico OR**: `OR`
+
+### **3. Tipos Suportados**
+- **Primitivos**: `integer`, `real`, `boolean`, `string`
+- **Compostos**: `array[min..max] of integer`
+- **Literais**: `números inteiros`, `reais`, `strings`, `true`, `false`
+
+### **4. Estruturas de Controle**
+- **Condicionais**: `if-then`, `if-then-else`
+- **Loops**: `while-do`, `for-to-do`, `for-downto-do`
+- **I/O**: `write()`, `writeln()`, `readln()`
+
+### **5. Operações com Arrays e Strings**
+- **Acesso**: `array[index]`, `string[index]`
+- **Função length**: `length(variable)`
+- **Atribuição**: `variable := value`, `array[index] := value`
+
+Esta gramática implementa uma versão simplificada do Pascal.

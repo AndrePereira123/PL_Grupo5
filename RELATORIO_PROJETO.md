@@ -1,12 +1,10 @@
-**Processamento de Linguagens**  
-**(3º ano de Curso)**
-
 # Trabalho Prático  
+**Processamento de Linguagens**  
+**(3º ano - LEI)**
 ## Relatório de Desenvolvimento
 
-**Nome-Aluno1** (número-al1)  
-**Nome-Aluno2** (número-al2)  
-**Nome-Aluno3** (número-al3)  
+**Andre Pereira** (número-a104275)  
+**Leonardo Alves** (número-a104093)  
 
 *31 de Maio de 2025*
 
@@ -14,71 +12,23 @@
 
 ## Resumo
 
-Este relatório apresenta o desenvolvimento de um compilador para uma versão simplificada da linguagem Pascal, focando na implementação de um analisador léxico, parser LL(1) e gerador de código assembly. O objetivo principal foi resolver o problema clássico do "dangling else" através de uma gramática livre de conflitos, utilizando a abordagem de statements "abertos" e "fechados". Os resultados demonstram a eliminação completa dos conflitos shift/reduce e reduce/reduce, garantindo uma análise sintática determinística e geração correta de código assembly para estruturas condicionais e iterativas.
-
----
-
-## Conteúdo
-
-**1 Introdução** ................................................................................................. 2  
-1.1 Contexto e Objetivos ........................................................................................ 2  
-1.2 Estrutura do Documento ................................................................................... 3  
-
-**2 Análise e Especificação** ................................................................................... 4  
-2.1 Descrição Informal do Problema ........................................................................ 4  
-2.2 Especificação dos Requisitos ............................................................................. 4  
-2.2.1 Dados .......................................................................................................... 5  
-2.2.2 Funcionalidades ........................................................................................... 5  
-2.2.3 Restrições ................................................................................................... 5  
-
-**3 Concepção/desenho da Resolução** ...................................................................... 6  
-3.1 Arquitetura do Sistema Proposto ....................................................................... 6  
-3.2 Gramática LL(1) ............................................................................................... 7  
-3.3 Resolução do Dangling Else .............................................................................. 8  
-
-**4 Implementação** ................................................................................................ 9  
-4.1 Alternativas Tecnológicas e Decisões ................................................................. 9  
-4.2 Desenvolvimento .............................................................................................. 10  
-
-**5 O Sistema Desenvolvido e Testes** ..................................................................... 11  
-5.1 Testes Realizados e Resultados ......................................................................... 11  
-
-**6 Conclusão** ...................................................................................................... 12  
-
-**A Código do Programa** ....................................................................................... 13  
+Este relatório tem como proposito a exposicao do processo de desenvolvimento de um compilador para uma versão simplificada da linguagem Pascal, focado na traduçao do código escrito em pascal para codigo "maquina" que seja funcional na virtual machine EWVM (https://ewvm.epl.di.uminho.pt). Os resultados demonstram a eliminação completa dos conflitos shift/reduce e reduce/reduce, garantindo uma análise sintática determinística e geração correta de código para estruturas condicionais e iterativas.
 
 ---
 
 # Capítulo 1
 ## Introdução
 
-**Supervisor:** Pedro Rangel Henriques  
-**Área:** Processamento de Linguagens
+No âmbito da disciplina de Processamento de Linguagens, fomos desafiados a desenvolver um compilador para Pascal Standard, fazendo a sua tradução para código máquina da EWVM. Perante isto, para a geração de código máquina, seguimos uma tradução dirigida pela sintaxe, onde o código Pascal é automaticamente convertido em código da VM.
 
-### 1.1 Contexto e Objetivos
+Para a análise léxica e sintática, recorremos ao PLY, que foi a biblioteca utilizada ao longo do semest
+et e sacitárp salua san e
+
 
 **Enquadramento do tema proposto**
 
 O desenvolvimento de compiladores constitui uma área fundamental da Ciência da Computação, envolvendo técnicas sofisticadas de análise léxica, sintática e semântica. Este projeto insere-se no contexto da disciplina de Processamento de Linguagens, abordando a implementação prática de um compilador para Pascal.
 
-**Contexto do tema**
-
-A linguagem Pascal, criada por Niklaus Wirth, é reconhecida pela sua estrutura clara e adequação ao ensino de programação. A implementação de um compilador Pascal permite explorar conceitos fundamentais como gramáticas LL(1), resolução de conflitos sintáticos e geração de código.
-
-**Problema**
-
-O principal desafio abordado neste projeto é o problema clássico do **"dangling else"**, que ocorre em gramáticas ambíguas quando o parser não consegue determinar a qual comando `IF` um `ELSE` deve ser associado. Este problema manifesta-se através de conflitos shift/reduce no parser.
-
-**Objetivo do relatório**
-
-Documentar o processo de desenvolvimento de um compilador Pascal LL(1), com ênfase especial na resolução do problema do dangling else através de técnicas de reestruturação gramatical.
-
-**Resultados ou Contributos**
-
-- Implementação de um analisador léxico completo para Pascal
-- Parser LL(1) livre de conflitos utilizando gramática estratificada
-- Gerador de código assembly funcional
-- Resolução definitiva do problema do dangling else
 
 **Estrutura do documento**
 ### 1.2 Estrutura do Documento
@@ -96,196 +46,308 @@ Documentar o processo de desenvolvimento de um compilador Pascal LL(1), com ênf
 ---
 
 # Capítulo 2
-## Análise e Especificação
+## Tokenização 
 
-### 2.1 Descrição Informal do Problema
+Definida no ficheiro "lex.py" encontra-se o análisador léxico que desenvolvemos para capturar os tokens associados a linguagem pascal. Para o desenvolver percorremos os programas de pascal de exemplo e adicionamos todos os tokens a medida que os identificavamos; assim, iterativamente, e com as impressoes geradas pelo lexer na consola, alcançamos uma lista de tokens compreensiva. Dada a lista de tokens definimos as regras de captura para cada uma tendo atençao a ordem com que as definiamos para garantir a presedencia correta.
 
-O objetivo deste projeto é desenvolver um compilador para uma versão simplificada da linguagem Pascal que seja capaz de:
+Segue-se uma descricao dos tokens: 
 
-1. **Análise Léxica**: Reconhecer tokens da linguagem Pascal (palavras-chave, identificadores, operadores, etc.)
-2. **Análise Sintática**: Implementar um parser LL(1) que processe a gramática Pascal sem conflitos
-3. **Geração de Código**: Produzir código assembly a partir do código Pascal analisado
-4. **Resolução de Ambiguidades**: Tratar especificamente o problema do "dangling else"
+## 2.1 Análise Léxica - Tokens Implementados
 
-O principal desafio técnico identificado é a resolução do problema do dangling else, que se manifesta através de conflitos shift/reduce nos estados 119, 120 e conflitos reduce/reduce nos estados 114, 116, 136, 139 do parser.
+O analisador léxico reconhece os seguintes tokens organizados por categoria funcional:
 
-### 2.2 Especificação dos Requisitos
+### **2.1.1 Literais e Identificadores**
+| Token | Descrição | Exemplo |
+|-------|-----------|---------|
+| `INTEGER` | Números inteiros | `42`, `0`, `-15` |
+| `REAL` | Números reais (ponto flutuante) | `3.14`, `0.5`, `-2.718` |
+| `STRING` | Literais de string | `"Hello World"`, `'Pascal'` |
+| `TRUE` | Literal booleano verdadeiro | `true` |
+| `FALSE` | Literal booleano falso | `false` |
+| `IDENTIFIER` | Identificadores de variáveis/funções | `x`, `contador`, `meuArray` |
 
-#### 2.2.1 Dados
+### **2.1.2 Operadores Aritméticos**
+| Token | Descrição | Exemplo |
+|-------|-----------|---------|
+| `PLUS` | Operador de adição | `+` |
+| `MINUS` | Operador de subtração | `-` |
+| `TIMES` | Operador de multiplicação | `*` |
+| `DIVIDE` | Divisão inteira (div) | `div` |
+| `REAL_DIVIDE` | Divisão real | `/` |
+| `MOD` | Operador módulo (resto) | `mod` |
 
-**Entrada do Sistema:**
-- Arquivos de código fonte Pascal (.pas)
-- Programas contendo:
-  - Declarações de variáveis
-  - Estruturas condicionais (IF-ELSE)
-  - Estruturas iterativas (WHILE, FOR)
-  - Comandos de entrada/saída (WRITELN, WRITE, READLN)
-  - Expressões aritméticas e lógicas
+### **2.1.3 Operadores Relacionais**
+| Token | Descrição | Exemplo |
+|-------|-----------|---------|
+| `EQUAL` | Igualdade | `=` |
+| `NE` | Diferente (not equal) | `<>` |
+| `LT` | Menor que | `<` |
+| `GT` | Maior que | `>` |
+| `LE` | Menor ou igual | `<=` |
+| `GE` | Maior ou igual | `>=` |
 
-**Saída do Sistema:**
-- Código assembly (.asm)
-- Relatórios de erros léxicos/sintáticos
-- Tabela de símbolos
+### **2.1.4 Operadores Lógicos**
+| Token | Descrição | Exemplo |
+|-------|-----------|---------|
+| `AND` | Conjunção lógica | `and` |
+| `OR` | Disjunção lógica | `or` |
+| `NOT` | Negação lógica | `not` |
 
-**Estrutura dos Dados:**
-```
-PL_Grupo5/
-├── lex.py              # Analisador léxico
-├── yacc.py             # Analisador sintático e gerador de código
-├── gramatica.md        # Especificação da gramática LL(1)
-├── parser.out          # Output do parser com análise de conflitos
-├── programas_pascal/   # Programas Pascal de teste
-├── programas_gerados/  # Código assembly gerado
-└── projeto.pdf         # Especificação do projeto
-```
+### **2.1.5 Delimitadores e Pontuação**
+| Token | Descrição | Exemplo |
+|-------|-----------|---------|
+| `LPAREN` | Parêntesis esquerdo | `(` |
+| `RPAREN` | Parêntesis direito | `)` |
+| `LBRACKET` | Colchete esquerdo | `[` |
+| `RBRACKET` | Colchete direito | `]` |
+| `SEMICOLON` | Ponto e vírgula | `;` |
+| `COLON` | Dois pontos | `:` |
+| `COMMA` | Vírgula | `,` |
+| `DOT` | Ponto | `.` |
 
-#### 2.2.2 Funcionalidades
+### **2.1.6 Operadores de Atribuição**
+| Token | Descrição | Exemplo |
+|-------|-----------|---------|
+| `ASSIGN` | Atribuição | `:=` |
 
-**RF1 - Análise Léxica:**
-- Reconhecimento de tokens Pascal
-- Tratamento de comentários
-- Identificação de erros léxicos
+### **2.1.7 Palavras-chave da Linguagem**
+| Token | Descrição | Exemplo |
+|-------|-----------|---------|
+| `PROGRAM` | Declaração de programa | `program` |
+| `BEGIN` | Início de bloco | `begin` |
+| `END` | Fim de bloco | `end` |
+| `END_DOT` | Fim de programa | `end.` |
+| `VAR` | Declaração de variáveis | `var` |
 
-**RF2 - Análise Sintática:**
-- Parser LL(1) determinístico
-- Tratamento de erros sintáticos
-- Geração de árvore sintática
+### **2.1.8 Tipos de Dados**
+| Token | Descrição | Exemplo |
+|-------|-----------|---------|
+| `TYPE_INTEGER` | Tipo inteiro | `integer` |
+| `TYPE_REAL` | Tipo real | `real` |
+| `TYPE_STRING` | Tipo string | `string` |
+| `BOOLEAN` | Tipo booleano | `boolean` |
+| `ARRAY` | Declaração de array | `array` |
+| `OF` | Palavra-chave para arrays | `of` |
 
-**RF3 - Resolução do Dangling Else:**
-- Eliminação de conflitos shift/reduce
-- Associação correta de ELSE com IF
-- Manutenção da semântica Pascal
+### **2.1.9 Estruturas de Controle**
+| Token | Descrição | Exemplo |
+|-------|-----------|---------|
+| `IF` | Condicional se | `if` |
+| `THEN` | Então (condicional) | `then` |
+| `ELSE` | Senão (condicional) | `else` |
+| `WHILE` | Loop enquanto | `while` |
+| `DO` | Fazer (loop) | `do` |
+| `FOR` | Loop para | `for` |
+| `TO` | Até (loop crescente) | `to` |
+| `DOWNTO` | Até (loop decrescente) | `downto` |
 
-**RF4 - Geração de Código:**
-- Tradução para assembly
-- Geração de instruções de salto
-- Otimizações básicas
+### **2.1.10 Comandos de I/O**
+| Token | Descrição | Exemplo |
+|-------|-----------|---------|
+| `WRITE` | Escrita sem quebra de linha | `write` |
+| `WRITELN` | Escrita com quebra de linha | `writeln` |
+| `READLN` | Leitura de entrada | `readln` 
 
-#### 2.2.3 Restrições
-
-**RNF1 - Gramática LL(1):**
-- Parser deve ser determinístico
-- Ausência de conflitos shift/reduce
-- Ausência de conflitos reduce/reduce
-
-**RNF2 - Compatibilidade:**
-- Subconjunto da linguagem Pascal
-- Suporte a tipos básicos (integer, boolean, string)
-- Estruturas de controle essenciais
-
----
 
 # Capítulo 3
-## Concepção/desenho da Resolução
+## Gramatica (Analise Sintatica)
 
-### 3.1 Arquitetura do Sistema Proposto
+O processo de implementacao da gramatica foi gradual e irregular, começou com uma gramatica simples para o primeiro exemplo de programa "hello_world" e , rapidamente, as falhas reveleram-se quantos mais testes fossem realizados; problemas de shift/reduce com declaracoes if foram um dos maiores problemas mas houve outros como ... INSERIR AQUI PROBLEMAS 
 
-O sistema proposto segue a arquitetura clássica de compiladores, organizada em três fases principais:
-
+A gramatica final tomou esta forma : ("gramatica.md")
+### **Estrutura Principal**
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   ANÁLISE       │    │   ANÁLISE       │    │   GERAÇÃO       │
-│   LÉXICA        │───▶│   SINTÁTICA     │───▶│   DE CÓDIGO     │
-│   (lex.py)      │    │   (yacc.py)     │    │   (yacc.py)     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│     TOKENS      │    │  ÁRVORE SINT.   │    │  CÓDIGO ASSY    │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+file → PROGRAM name vars code
+
+name → IDENTIFIER SEMICOLON
 ```
 
-**Componentes do Sistema:**
-
-1. **Analisador Léxico (lex.py)**
-   - Implementado com PLY (Python Lex-Yacc)
-   - Reconhece tokens Pascal
-   - Trata comentários e espaços em branco
-
-2. **Analisador Sintático (yacc.py)**
-   - Parser LL(1) com PLY
-   - Gramática livre de conflitos
-   - Geração simultânea de código
-
-3. **Gerador de Código (integrado)**
-   - Produz assembly durante o parsing
-   - Instruções de salto para controle de fluxo
-   - Gestão de labels únicos
-### 3.2 Gramática LL(1)
-
-A gramática foi transformada para ser LL(1) compatível, conforme especificado em `gramatica.md`.
-
-**Principais Produções:**
+### **Declaração de Variáveis**
 ```
-file : name vars program
-name : IDENTIFIER SEMICOLON
-vars : VAR varstail | ε
-program : BEGIN expressions END
-statement : WRITELN | WRITE | READLN | IF | FOR | WHILE
+vars → VAR varstail
+     | empty
+
+varstail → vardecl varstail
+         | empty
+
+vardecl → idlist COLON type SEMICOLON
+
+idlist → IDENTIFIER idlistTail
+
+idlistTail → COMMA IDENTIFIER idlistTail
+           | empty
 ```
 
-**Tokens Implementados:**
-- **Palavras-chave**: `BEGIN`, `END`, `IF`, `ELSE`, `WHILE`, `FOR`, `VAR`, `PROGRAM`
-- **Operadores**: `+`, `-`, `*`, `/`, `=`, `<>`, `<`, `>`, `<=`, `>=`
-- **Delimitadores**: `(`, `)`, `;`, `,`, `:`, `[`, `]`
-- **Literais**: números inteiros, strings, identificadores, booleanos
+### **Tipos de Dados**
+```
+type → TYPE_INTEGER
+     | TYPE_REAL
+     | BOOLEAN
+     | TYPE_STRING
+     | ARRAY LBRACKET arraytypes RBRACKET OF type
 
-### 3.3 Resolução do Dangling Else
-
-#### 3.3.1 Identificação do Problema
-
-Durante a análise do arquivo `parser.out`, foram identificados conflitos críticos:
-
-**Tabela 3.1: Conflitos Identificados**
-
-| Estado | Tipo de Conflito | Token | Descrição |
-|--------|------------------|-------|-----------|
-| 119 | shift/reduce | ELSE | Ambiguidade na associação ELSE-IF |
-| 120 | shift/reduce | ELSE | Conflito similar ao estado 119 |
-| 114 | reduce/reduce | - | Múltiplas reduções possíveis |
-| 116 | reduce/reduce | - | Ambiguidade em reduções |
-
-#### 3.3.2 Solução Implementada
-
-**Abordagem: Statements "Abertos" e "Fechados"**
-
-Baseada no método Parsifal Software, a solução estratifica a gramática em dois tipos de statements:
-
-```python
-# Declaração de precedência para resolver dangling else
-precedence = (
-    ('right', 'ELSE'),  # ELSE tem associatividade à direita
-    ('left', 'OR'),
-    ('left', 'AND'),
-    ('left', 'EQ', 'NE'),
-    ('left', 'LT', 'LE', 'GT', 'GE'),
-    ('left', 'PLUS', 'MINUS'),
-    ('left', 'TIMES', 'DIV', 'MOD'),
-)
-
-# Regras de gramática livre de conflitos
-def p_open_statement(p):
-    '''open_statement : IF LPAREN expression RPAREN statement
-                     | IF LPAREN expression RPAREN closed_statement ELSE open_statement
-                     | WHILE LPAREN expression RPAREN open_statement
-                     | FOR IDENTIFIER ASSIGN expression TO expression DO open_statement'''
-
-def p_closed_statement(p):
-    '''closed_statement : IF LPAREN expression RPAREN closed_statement ELSE closed_statement
-                        | WHILE LPAREN expression RPAREN closed_statement
-                        | FOR IDENTIFIER ASSIGN expression TO expression DO closed_statement
-                        | simple_statement'''
+arraytypes → INTEGER
+           | INTEGER DOT DOT INTEGER
 ```
 
-**Vantagens da Solução:**
-- **Sem conflitos**: Elimina completamente os conflitos shift/reduce
-- **Semântica clara**: ELSE sempre associa com o IF mais próximo
-- **LL(1) compatível**: Mantém a propriedade LL(1) da gramática
+### **Estrutura do Programa**
+```
+code → BEGIN expressions END_DOT
 
----
+dotless_code → BEGIN expressions END
+
+expressions → statement expressions_tail
+            | empty
+
+expressions_tail → SEMICOLON expressions
+                 | empty
+```
+
+### **Statements (Solução Dangling Else)**
+```
+statement → open_statement
+          | closed_statement
+
+open_statement → IF if_condition THEN code_or_statement
+               | IF if_condition THEN code_or_statement ELSE open_statement
+               | WHILE if_condition DO open_statement
+               | FOR for_condition DO open_statement
+
+closed_statement → IDENTIFIER identifier_assign_expression
+                 | WRITELN write_statement
+                 | WRITE write_statement
+                 | READLN readln_statement
+                 | IF if_condition THEN code_or_statement ELSE code_or_statement
+                 | FOR for_condition DO code_or_statement
+                 | WHILE if_condition DO code_or_statement
+```
+
+### **Atribuições e Condições**
+```
+identifier_assign_expression → ASSIGN assign_expression
+                             | LBRACKET expression RBRACKET ASSIGN assign_expression
+
+for_condition → expression ASSIGN expression to_expression
+
+to_expression → TO expression
+              | DOWNTO expression
+
+code_or_statement → dotless_code
+                  | closed_statement
+
+if_condition → expression
+```
+
+### **I/O Statements**
+```
+write_statement → LPAREN string_statement RPAREN
+
+readln_statement → LPAREN string_statement RPAREN
+
+string_statement → assign_expression
+                 | assign_expression COMMA string_statement
+
+assign_expression → expression
+```
+
+### **Expressões Booleanas e Aritméticas**
+```
+expression → expression OR and_expression
+           | and_expression
+
+and_expression → and_expression AND relation_expression
+               | relation_expression
+
+relation_expression → simple_expression expression_tail
+                    | NOT simple_expression expression_tail
+
+expression_tail → LT simple_expression
+                | GT simple_expression
+                | LE simple_expression
+                | GE simple_expression
+                | NE simple_expression
+                | EQUAL simple_expression
+                | empty
+```
+
+### **Expressões Aritméticas**
+```
+simple_expression → term simple_expression_tail
+
+simple_expression_tail → PLUS term simple_expression_tail
+                       | MINUS term simple_expression_tail
+                       | empty
+
+term → factor term_tail
+
+term_tail → TIMES factor term_tail
+          | DIVIDE factor term_tail
+          | MOD factor term_tail
+          | REAL_DIVIDE factor term_tail
+          | empty
+```
+
+### **Fatores**
+```
+factor → PLUS factor
+       | MINUS factor
+       | LPAREN expression RPAREN
+       | INTEGER
+       | REAL
+       | IDENTIFIER identifier_expression
+       | IDENTIFIER length_expression
+       | TRUE
+       | STRING
+       | FALSE
+```
+
+### **Acesso a Arrays e funçao length**
+```
+length_expression → LPAREN IDENTIFIER RPAREN
+
+identifier_expression → LBRACKET expression RBRACKET
+                      | empty
+```
+
+### **Regra Vazia**
+```
+empty → ε
+```
+
+## **Características Especiais da Gramática**
+
+### **1. Solução para Dangling Else**
+- **open_statement**: Statements incompletos que podem causar ambiguidade
+- **closed_statement**: Statements completos e bem definidos
+
+### **2. Precedência de Operadores (da maior para menor)**
+1. **Unário**: `+`, `-`, `NOT`
+2. **Multiplicativo**: `*`, `div`, `mod`, `/`
+3. **Aditivo**: `+`, `-`
+4. **Relacional**: `=`, `<>`, `<`, `>`, `<=`, `>=`
+5. **Lógico AND**: `AND`
+6. **Lógico OR**: `OR`
+
+### **3. Tipos Suportados**
+- **Primitivos**: `integer`, `real`, `boolean`, `string`
+- **Compostos**: `array[min..max] of integer`
+- **Literais**: `números inteiros`, `reais`, `strings`, `true`, `false`
+
+### **4. Estruturas de Controle**
+- **Condicionais**: `if-then`, `if-then-else`
+- **Loops**: `while-do`, `for-to-do`, `for-downto-do`
+- **I/O**: `write()`, `writeln()`, `readln()`
+
+### **5. Operações com Arrays e Strings**
+- **Acesso**: `array[index]`, `string[index]`
+- **Função length**: `length(variable)`
+- **Atribuição**: `variable := value`, `array[index] := value`
+
+Esta gramática implementa uma versão simplificada do Pascal.
+
 
 # Capítulo 4
-## Implementação
+## Implementação (Analise Semantica)
 
 ### 4.1 Alternativas Tecnológicas e Decisões
 
@@ -315,31 +377,6 @@ def p_closed_statement(p):
 | Code Generation | During parsing vs Separate phase | Durante parsing é mais eficiente |
 | Error Recovery | Panic mode vs Phrase level | Panic mode mais simples |
 
-### 4.2 Desenvolvimento
-
-**Fases de Desenvolvimento:**
-
-1. **Fase 1: Análise Léxica**
-   - Definição de tokens
-   - Implementação de expressões regulares
-   - Tratamento de comentários e whitespace
-
-2. **Fase 2: Gramática Básica**
-   - Implementação da gramática inicial
-   - Identificação de conflitos
-   - Análise do arquivo parser.out
-
-3. **Fase 3: Resolução de Conflitos**
-   - Implementação da gramática estratificada
-   - Testes de eliminação de conflitos
-   - Validação da propriedade LL(1)
-
-4. **Fase 4: Geração de Código**
-   - Implementação do gerador de assembly
-   - Criação do sistema de labels
-   - Testes de execução
-
----
 
 # Capítulo 5
 ## O Sistema Desenvolvido e Testes

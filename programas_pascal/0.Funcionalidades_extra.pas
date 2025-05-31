@@ -28,7 +28,7 @@ begin
     writeln(s,10,s,10);
     writeln(s[1]);  // Acessando o primeiro caractere
 
-    
+
 
     // if, while e for com OR e AND 
     if (a or b) and (x < 5) then
@@ -39,7 +39,7 @@ begin
     else
     begin
         writeln('Condição falsa');
-        writeln('x = ', x);  // ✅ CORRIGIDO: writeln (não println)
+        writeln('x = ', x);  
     end;
 
     while (a and b) or (x < 10) do
