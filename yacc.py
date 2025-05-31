@@ -571,6 +571,7 @@ def p_write_statement(p):
 def p_readln_statement(p):
     'readln_statement : LPAREN string_statement RPAREN'
     p[0] = []
+    print(p[2])
     for arg in p[2]:
         argtype, code = arg
 
@@ -653,12 +654,8 @@ def p_string_statement(p):
         p[0] = [p[1]] + p[3]
 
 def p_assign_expression(p):
-    '''assign_expression : expression
-                         | STRING ''' 
-    if p.slice[1].type == 'STRING':
-        p[0] = ('string_pure', p[1])
-    else:
-        p[0] = p[1]
+    '''assign_expression : expression ''' 
+    p[0] = p[1]
 
 
 ##################################### expression (aritmetrica e booleana) ##########################################
@@ -697,7 +694,9 @@ def p_relation_expression(p):                                               ## (
         type1, code1 = p[1]
         
         if type1.lower() == type2.lower():
-            pass    
+            pass
+        elif type1.lower() == 'char' and type2.lower() == 'string_pure': # para suportar bin[i] = '1'
+            pass
         elif (type1.lower(), type2.lower()) in [('integer', 'real'), ('real', 'integer')]:
             # Converte integer para real
             if type1.lower() == 'integer':
@@ -732,7 +731,12 @@ def p_relation_expression(p):                                               ## (
             else:
                 raise TypeError(f"Tipo de dado inválido para comparação: {type1} {op} {type2}")
         else:
-            if type2.lower() == 'char':
+            if type2.lower() == 'string_pure':
+                if len(code2) == 1: # só funciona para comparar elementos de uma string
+                    code2 = [f"      PUSHS \"{p[2][2]}\"\n     CHRCODE\n"]
+                else:
+                    raise TypeError(f"O compilador não suportar comprar char com strings")
+                
                 instr = {
                     '<': 'INF',
                     '>': 'SUP',
@@ -905,8 +909,8 @@ def p_factor(p):                        ## carrega o valor para topo da stack
               | REAL
               | IDENTIFIER identifier_expression
               | IDENTIFIER length_expression
-              | STRING
               | TRUE
+              | STRING
               | FALSE'''
     
     global variaveis, index
@@ -945,10 +949,11 @@ def p_factor(p):                        ## carrega o valor para topo da stack
         p[0] = p[2]
     
     elif p.slice[1].type == 'STRING':
-        if len(p[1]) == 1: # só funciona para comparar elementos de uma string
+        p[0] = ('string_pure', p[1])
+        """ if len(p[1]) == 1: # só funciona para comparar elementos de uma string
             p[0] = ('char', [f"      PUSHS \"{p[1]}\"\n     CHRCODE\n"])
         else:
-            p[0] = ('string_pure', [f"      PUSHS \"{p[1]}\"\n"])
+            p[0] = ('string_pure', [f"      PUSHS \"{p[1]}\"\n"]) """
 
     elif len(p) == 4:
         p[0] = p[2]
