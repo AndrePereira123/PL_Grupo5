@@ -63,11 +63,11 @@ ELSE1:
        STOREG 3
 ENDIF1:
 ENDIF2:
+     PUSHS "O maior é: "
+     WRITES
      PUSHFP
        LOAD -1
        STRI
-     PUSHS "O maior é: "
-     CONCAT
      WRITES
        WRITELN
 STOP

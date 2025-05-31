@@ -47,20 +47,20 @@ WHILEEND0:
      PUSHFP
        LOAD -1
 JZ ELSE1
-     PUSHS " é um número primo"
      PUSHFP
        LOAD -3
        STRI
-     CONCAT
+     WRITES
+     PUSHS " é um número primo"
      WRITES
        WRITELN
      JUMP ENDIF1
 ELSE1:
-     PUSHS " não é um número primo"
      PUSHFP
        LOAD -3
        STRI
-     CONCAT
+     WRITES
+     PUSHS " não é um número primo"
      WRITES
        WRITELN
 ENDIF1:

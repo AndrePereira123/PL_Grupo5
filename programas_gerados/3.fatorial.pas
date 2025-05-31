@@ -34,17 +34,17 @@ JZ FOREND0
      STOREG 1
      JUMP FORSTART0
 FOREND0:
-     PUSHFP
-       LOAD -1
-       STRI
-     PUSHS ": "
-     CONCAT
+     PUSHS "Fatorial de "
+     WRITES
      PUSHFP
        LOAD -3
        STRI
-     CONCAT
-     PUSHS "Fatorial de "
-     CONCAT
+     WRITES
+     PUSHS ": "
+     WRITES
+     PUSHFP
+       LOAD -1
+       STRI
      WRITES
        WRITELN
 STOP

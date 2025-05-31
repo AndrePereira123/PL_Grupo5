@@ -1,10 +1,5 @@
 Created by PLY version 3.11 (http://www.dabeaz.com/ply)
 
-Unused terminals:
-
-    FUNCTION
-    PROCEDURE
-
 Grammar
 
 Rule 0     S' -> file
@@ -114,7 +109,6 @@ END_DOT              : 18
 EQUAL                : 61
 FALSE                : 82
 FOR                  : 29 35
-FUNCTION             : 
 GE                   : 59
 GT                   : 57
 IDENTIFIER           : 2 8 9 30 78 79 83
@@ -131,7 +125,6 @@ NOT                  : 55
 OF                   : 15
 OR                   : 50
 PLUS                 : 64 73
-PROCEDURE            : 
 PROGRAM              : 1
 RBRACKET             : 15 38 84
 READLN               : 33

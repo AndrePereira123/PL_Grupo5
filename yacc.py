@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 from lex import tokens
 import ply.yacc as yacc
 
@@ -290,9 +291,12 @@ def p_closed_statement(p):
                 if (actual_type.lower() == tipo_guardado):
                     commands_to_output = []
                     for i,c in enumerate(commands):
-                        commands_to_output += [f'     PUSHST {struct_index}\n     PUSHI {i}\n',
+                        commands_to_output += [f'     PUSHST {struct_index}\n     PUSHI {i+1}\n',
                                     c,
                                     f'     STOREN\n']
+                        
+                    
+                    commands_to_output += [f'       PUSHST {struct_index}\n     PUSHI 0\n     PUSHI {len(commands)}\n       STOREN\n']
 
 
                     # atualizar tamanho    
@@ -482,8 +486,8 @@ def p_write_statement(p):
     'write_statement : LPAREN string_statement RPAREN'
     p[0] = []
     first_iteration = True
-    check = False
-    for arg in reversed(p[2]):
+    for arg in p[2]:
+        check = False
         expressao_ou_string = arg
 
         type, linhas_calculo = expressao_ou_string
@@ -561,19 +565,14 @@ def p_write_statement(p):
                 p[0] += linhas_calculo + ["       WRITEI\n"]
                 check = True
             
-        if not first_iteration:
-            p[0] += ["     CONCAT\n"]
-        else:
-            first_iteration = False
+        if not check:
+            p[0] += ["     WRITES\n"]
     
-    if not check:
-        p[0] += ["     WRITES\n"]
 
 
 def p_readln_statement(p):
     'readln_statement : LPAREN string_statement RPAREN'
     p[0] = []
-    print(p[2])
     for arg in p[2]:
         argtype, code = arg
 
@@ -1087,18 +1086,44 @@ def reset_variaveis():
 
 parser = yacc.yacc(debug=True)
 
-folder_path = 'programas_pascal'
-limite_ficheiros = 5
-ficheiro = 0
-for file_name in os.listdir(folder_path) :
-    if ficheiro < limite_ficheiros:
-        if file_name.endswith('.pas'):
-            with open(os.path.join(folder_path, file_name), 'r') as file:
-                reset_variaveis() ## para garantir que cada ficheiro tem o seu proprio dicionario de variaveis senao aponta 
-                                  ## para slots errados na maquina virtual
+if len(sys.argv) == 1:  # Nenhum argumento fornecido
+    folder_path = 'programas_pascal'
+    limite_ficheiros = 7
+    ficheiro = 0
+    for file_name in os.listdir(folder_path):
+        if ficheiro < limite_ficheiros:
+            if file_name.endswith('.pas'):
+                with open(os.path.join(folder_path, file_name), 'r') as file:
+                    reset_variaveis()  # Para garantir que cada ficheiro tem o seu próprio dicionário de variáveis
+                    data = file.read()
+                    val = parser.parse(data)
+                    with open(f'programas_gerados/{file_name}', 'w') as output_file:
+                        for linha in val:
+                            output_file.write(f"{linha}")
+            ficheiro += 1
+            
+elif len(sys.argv) == 2:  # Um argumento fornecido (caminho do arquivo)
+    file_path = sys.argv[1]
+    if file_path.endswith('.pas'):
+        try:
+            with open(file_path, 'r') as file:
+                reset_variaveis()
                 data = file.read()
                 val = parser.parse(data)
-                with open(f'programas_gerados/{file_name}', 'w') as output_file:
+                
+                base_name = os.path.basename(file_path)
+                output_path = f'programas_gerados/{base_name}'
+                
+                with open(output_path, 'w') as output_file:
                     for linha in val:
                         output_file.write(f"{linha}")
-        ficheiro += 1
+                        
+                print(f"Arquivo compilado: {file_path} -> {output_path}")
+                
+        except FileNotFoundError:
+            print(f"Erro: Arquivo não encontrado: {file_path}")
+        except Exception as e:
+            print(f"Erro ao processar arquivo {file_path}: {e}")
+    else:
+        print("Erro: O arquivo deve ter extensão .pas")
+        

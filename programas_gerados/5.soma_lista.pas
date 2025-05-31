@@ -40,11 +40,11 @@ JZ FOREND0
      STOREG 1
      JUMP FORSTART0
 FOREND0:
+     PUSHS "A soma dos números é: "
+     WRITES
      PUSHFP
        LOAD -1
        STRI
-     PUSHS "A soma dos números é: "
-     CONCAT
      WRITES
        WRITELN
 STOP

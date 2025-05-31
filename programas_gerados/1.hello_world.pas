@@ -2,10 +2,10 @@
      PUSHF 0.0
      ALLOC 256
 START
+     PUSHS "Ola, Mundo!"
+     WRITES
      PUSHF 12.23
        STRF
-     PUSHS "Ola, Mundo!"
-     CONCAT
      WRITES
        WRITELN
      READ
@@ -18,20 +18,20 @@ START
        STRI
      WRITES
        WRITELN
+     PUSHS "Ola, Mundo!"
+     WRITES
      PUSHFP
        LOAD -3
        STRI
-     PUSHS "Ola, Mundo!"
-     CONCAT
      WRITES
        WRITELN
      PUSHI 10
        STOREG 0
+     PUSHS "Ola, Mundo!"
+     WRITES
      PUSHFP
        LOAD -3
        STRI
-     PUSHS "Ola, Mundo!"
-     CONCAT
      WRITES
        WRITELN
 STOP
