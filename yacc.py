@@ -16,6 +16,7 @@ index_variavel_ciclo_for = {} ## profundidade da variavel do ciclo for
 tipo_ciclo_for = {} ## tipo de ciclo (downto ou to  )
 ## index = valor na maquina virtual 
 
+
 def p_file(p):
     'file : PROGRAM name vars code'
     if p[3] is not None:
@@ -434,46 +435,21 @@ def p_code_or_statement(p):
 
 
 def p_if_condition(p):
-    '''if_condition : expression if_condition_tail'''
+    '''if_condition : expression'''
 
     if p [1][0].lower() != 'boolean':
         raise TypeError(f"Tipo de dado inválido para condição: {p[1][0]} (esperado = boolean)")
-    if p[2] is not None:
-        if p[2][0].lower() != 'boolean':
-            raise TypeError(f"Tipo de dado inválido para condição: {p[2][0]} (esperado = boolean)")
 
     type1, code1 = p[1]
-    type2, code2 = p[2] if p[2] is not None else (None, [])
 
     if len(p) == 3:
-        p[0] = (type1, code1 + code2)
+        p[0] = (type1, code1)
 
     else:
         p[0] = p[1]
     
     
 
-def p_if_condition_tail(p):
-    '''if_condition_tail : OR if_condition_tail_2
-                         | if_condition_tail_2'''
-    if len(p) == 3:                            
-        type1, code1 = p[2]
-        if type1.lower() != 'boolean':
-            raise TypeError("OR only allowed for booleans")
-        p[0] = ('boolean', code1 + ["     OR\n"])
-    else:
-        p[0] = p[1]
-
-def p_if_condition_tail_2(p):
-    '''if_condition_tail_2 : AND if_condition
-                           | empty'''
-    if len(p) == 3:                            
-        type1, code1 = p[2]
-        if type1.lower() != 'boolean':
-            raise TypeError("OR only allowed for booleans")
-        p[0] = ('boolean', code1 + ["     AND\n"])
-    else:
-        p[0] = p[1]
 
 
 def p_write_statement(p):                               
