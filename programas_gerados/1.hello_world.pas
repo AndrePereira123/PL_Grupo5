@@ -1,6 +1,6 @@
      PUSHI 0
      PUSHF 0.0
-     PUSHS ""
+     ALLOC 256
 START
      PUSHF 12.23
        STRF
