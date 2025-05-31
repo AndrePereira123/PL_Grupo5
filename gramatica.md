@@ -56,7 +56,7 @@ statement → open_statement
           | closed_statement
 
 open_statement → IF if_condition THEN code_or_statement
-               | IF if_condition THEN code_or_statement ELSE open_statement
+               | IF if_condition THEN code_or_statement ELSE open_statement 
                | WHILE if_condition DO open_statement
                | FOR for_condition DO open_statement
 
