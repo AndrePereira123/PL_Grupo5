@@ -448,8 +448,13 @@ Para um array, se este for definido da seguinte forma: ```v: array[1..5] of inte
 
 É importante também mencionar que, a forma como é calculado o tamanho de uma string é acedendo ao índice 0 da sua estrutura, uma vez que esse valor representa precisamente o tamanho da string guardada na struct. Por outro lado, o tamanho do array é sempre o mesmo quer esteja preenchido ou não (definição do Pascal) e, por isso, para calcular o tamanho do array basta pesquisar pela variável no dicionário guardado no YACC e, pegar no valor do tamanho do array. Opcionalmente podias controlar da mesma forma que as strings, no entanto, não achámos necessário uma vez que um array terá sempre o mesmo tamanho.
 
+Quanto aos arrays, é importante mencionar que iniciámos todos os índices com o valor de 0. Esta decisão foi apenas uma decisão de arquitetura uma vez que se tentarmos aceder a um índice de um certo array que não foi inicializado, este dará um valor sem significado e não dá erro.
+
 ## Write de strings
 Uma vez que guardámos as nossas strings na **struct heap**, para conseguirmos escrevê-la no ecrã decidimos recorrer à utilização de labels onde, será feito uma espécie de ciclo while enquanto não forem percorridos todos os elementos. Ou seja, iremos buscar o valor do tamanho da string (índice 0 da struct heap) e de seguida percorrer cada um dos índices válidos, utilizando o comando **WRITECHR** da VM para escrever a letra correspondente ao símbolo ASCII.
+
+## Controlo de erros
+De forma a evitar erros desnecessários de compilação, fazemos algum controlo de erros nomeadamente no assignment de um valor a uma certa variável, ou seja, verificámos se os tipos entre o valor a associar e o valor da variável são iguais, caso não sejam, irá ser lançado um TypeError pelo YACC.
 
 
 # Utilizaçao

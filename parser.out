@@ -40,7 +40,7 @@ Rule 34    closed_statement -> IF if_condition THEN code_or_statement ELSE code_
 Rule 35    closed_statement -> FOR for_condition DO code_or_statement
 Rule 36    closed_statement -> WHILE if_condition DO code_or_statement
 Rule 37    identifier_assign_expression -> ASSIGN assign_expression
-Rule 38    identifier_assign_expression -> LBRACKET expression RBRACKET ASSIGN assign_expression
+Rule 38    identifier_assign_expression -> LBRACKET simple_expression RBRACKET ASSIGN assign_expression
 Rule 39    for_condition -> expression ASSIGN expression to_expression
 Rule 40    to_expression -> TO expression
 Rule 41    to_expression -> DOWNTO expression
@@ -156,7 +156,7 @@ code                 : 1
 code_or_statement    : 26 27 34 34 35 36
 dotless_code         : 42
 empty                : 4 6 10 21 23 62 66 72 85
-expression           : 38 39 39 40 41 44 49 50 75 84
+expression           : 39 39 40 41 44 49 50 75 84
 expression_tail      : 54 55
 expressions          : 18 19 22
 expressions_tail     : 20
@@ -173,7 +173,7 @@ name                 : 1
 open_statement       : 24 27 28 29
 readln_statement     : 33
 relation_expression  : 52 53
-simple_expression    : 54 55 56 57 58 59 60 61
+simple_expression    : 38 54 55 56 57 58 59 60 61
 simple_expression_tail : 63 64 65
 statement            : 20
 string_statement     : 45 46 48
@@ -547,7 +547,7 @@ state 24
 
     (30) closed_statement -> IDENTIFIER . identifier_assign_expression
     (37) identifier_assign_expression -> . ASSIGN assign_expression
-    (38) identifier_assign_expression -> . LBRACKET expression RBRACKET ASSIGN assign_expression
+    (38) identifier_assign_expression -> . LBRACKET simple_expression RBRACKET ASSIGN assign_expression
 
     ASSIGN          shift and go to state 58
     LBRACKET        shift and go to state 59
@@ -718,8 +718,8 @@ state 39
     END_DOT         reduce using rule 51 (expression -> and_expression .)
     END             reduce using rule 51 (expression -> and_expression .)
     ELSE            reduce using rule 51 (expression -> and_expression .)
-    RBRACKET        reduce using rule 51 (expression -> and_expression .)
     COMMA           reduce using rule 51 (expression -> and_expression .)
+    RBRACKET        reduce using rule 51 (expression -> and_expression .)
     TO              reduce using rule 51 (expression -> and_expression .)
     DOWNTO          reduce using rule 51 (expression -> and_expression .)
     AND             shift and go to state 75
@@ -739,8 +739,8 @@ state 40
     END_DOT         reduce using rule 53 (and_expression -> relation_expression .)
     END             reduce using rule 53 (and_expression -> relation_expression .)
     ELSE            reduce using rule 53 (and_expression -> relation_expression .)
-    RBRACKET        reduce using rule 53 (and_expression -> relation_expression .)
     COMMA           reduce using rule 53 (and_expression -> relation_expression .)
+    RBRACKET        reduce using rule 53 (and_expression -> relation_expression .)
     TO              reduce using rule 53 (and_expression -> relation_expression .)
     DOWNTO          reduce using rule 53 (and_expression -> relation_expression .)
 
@@ -773,8 +773,8 @@ state 41
     END_DOT         reduce using rule 86 (empty -> .)
     END             reduce using rule 86 (empty -> .)
     ELSE            reduce using rule 86 (empty -> .)
-    RBRACKET        reduce using rule 86 (empty -> .)
     COMMA           reduce using rule 86 (empty -> .)
+    RBRACKET        reduce using rule 86 (empty -> .)
     TO              reduce using rule 86 (empty -> .)
     DOWNTO          reduce using rule 86 (empty -> .)
 
@@ -837,8 +837,8 @@ state 43
     END_DOT         reduce using rule 86 (empty -> .)
     END             reduce using rule 86 (empty -> .)
     ELSE            reduce using rule 86 (empty -> .)
-    RBRACKET        reduce using rule 86 (empty -> .)
     COMMA           reduce using rule 86 (empty -> .)
+    RBRACKET        reduce using rule 86 (empty -> .)
     TO              reduce using rule 86 (empty -> .)
     DOWNTO          reduce using rule 86 (empty -> .)
 
@@ -877,8 +877,8 @@ state 44
     END_DOT         reduce using rule 86 (empty -> .)
     END             reduce using rule 86 (empty -> .)
     ELSE            reduce using rule 86 (empty -> .)
-    RBRACKET        reduce using rule 86 (empty -> .)
     COMMA           reduce using rule 86 (empty -> .)
+    RBRACKET        reduce using rule 86 (empty -> .)
     TO              reduce using rule 86 (empty -> .)
     DOWNTO          reduce using rule 86 (empty -> .)
 
@@ -1003,8 +1003,8 @@ state 48
     END_DOT         reduce using rule 76 (factor -> INTEGER .)
     END             reduce using rule 76 (factor -> INTEGER .)
     ELSE            reduce using rule 76 (factor -> INTEGER .)
-    RBRACKET        reduce using rule 76 (factor -> INTEGER .)
     COMMA           reduce using rule 76 (factor -> INTEGER .)
+    RBRACKET        reduce using rule 76 (factor -> INTEGER .)
     TO              reduce using rule 76 (factor -> INTEGER .)
     DOWNTO          reduce using rule 76 (factor -> INTEGER .)
 
@@ -1035,8 +1035,8 @@ state 49
     END_DOT         reduce using rule 77 (factor -> REAL .)
     END             reduce using rule 77 (factor -> REAL .)
     ELSE            reduce using rule 77 (factor -> REAL .)
-    RBRACKET        reduce using rule 77 (factor -> REAL .)
     COMMA           reduce using rule 77 (factor -> REAL .)
+    RBRACKET        reduce using rule 77 (factor -> REAL .)
     TO              reduce using rule 77 (factor -> REAL .)
     DOWNTO          reduce using rule 77 (factor -> REAL .)
 
@@ -1074,8 +1074,8 @@ state 50
     END_DOT         reduce using rule 86 (empty -> .)
     END             reduce using rule 86 (empty -> .)
     ELSE            reduce using rule 86 (empty -> .)
-    RBRACKET        reduce using rule 86 (empty -> .)
     COMMA           reduce using rule 86 (empty -> .)
+    RBRACKET        reduce using rule 86 (empty -> .)
     TO              reduce using rule 86 (empty -> .)
     DOWNTO          reduce using rule 86 (empty -> .)
 
@@ -1109,8 +1109,8 @@ state 51
     END_DOT         reduce using rule 80 (factor -> TRUE .)
     END             reduce using rule 80 (factor -> TRUE .)
     ELSE            reduce using rule 80 (factor -> TRUE .)
-    RBRACKET        reduce using rule 80 (factor -> TRUE .)
     COMMA           reduce using rule 80 (factor -> TRUE .)
+    RBRACKET        reduce using rule 80 (factor -> TRUE .)
     TO              reduce using rule 80 (factor -> TRUE .)
     DOWNTO          reduce using rule 80 (factor -> TRUE .)
 
@@ -1141,8 +1141,8 @@ state 52
     END_DOT         reduce using rule 81 (factor -> STRING .)
     END             reduce using rule 81 (factor -> STRING .)
     ELSE            reduce using rule 81 (factor -> STRING .)
-    RBRACKET        reduce using rule 81 (factor -> STRING .)
     COMMA           reduce using rule 81 (factor -> STRING .)
+    RBRACKET        reduce using rule 81 (factor -> STRING .)
     TO              reduce using rule 81 (factor -> STRING .)
     DOWNTO          reduce using rule 81 (factor -> STRING .)
 
@@ -1173,8 +1173,8 @@ state 53
     END_DOT         reduce using rule 82 (factor -> FALSE .)
     END             reduce using rule 82 (factor -> FALSE .)
     ELSE            reduce using rule 82 (factor -> FALSE .)
-    RBRACKET        reduce using rule 82 (factor -> FALSE .)
     COMMA           reduce using rule 82 (factor -> FALSE .)
+    RBRACKET        reduce using rule 82 (factor -> FALSE .)
     TO              reduce using rule 82 (factor -> FALSE .)
     DOWNTO          reduce using rule 82 (factor -> FALSE .)
 
@@ -1258,13 +1258,7 @@ state 58
 
 state 59
 
-    (38) identifier_assign_expression -> LBRACKET . expression RBRACKET ASSIGN assign_expression
-    (50) expression -> . expression OR and_expression
-    (51) expression -> . and_expression
-    (52) and_expression -> . and_expression AND relation_expression
-    (53) and_expression -> . relation_expression
-    (54) relation_expression -> . simple_expression expression_tail
-    (55) relation_expression -> . NOT simple_expression expression_tail
+    (38) identifier_assign_expression -> LBRACKET . simple_expression RBRACKET ASSIGN assign_expression
     (63) simple_expression -> . term simple_expression_tail
     (67) term -> . factor term_tail
     (73) factor -> . PLUS factor
@@ -1278,7 +1272,6 @@ state 59
     (81) factor -> . STRING
     (82) factor -> . FALSE
 
-    NOT             shift and go to state 42
     PLUS            shift and go to state 45
     MINUS           shift and go to state 46
     LPAREN          shift and go to state 47
@@ -1289,10 +1282,7 @@ state 59
     STRING          shift and go to state 52
     FALSE           shift and go to state 53
 
-    expression                     shift and go to state 108
-    and_expression                 shift and go to state 39
-    relation_expression            shift and go to state 40
-    simple_expression              shift and go to state 41
+    simple_expression              shift and go to state 108
     term                           shift and go to state 43
     factor                         shift and go to state 44
 
@@ -1593,8 +1583,8 @@ state 76
     END_DOT         reduce using rule 54 (relation_expression -> simple_expression expression_tail .)
     END             reduce using rule 54 (relation_expression -> simple_expression expression_tail .)
     ELSE            reduce using rule 54 (relation_expression -> simple_expression expression_tail .)
-    RBRACKET        reduce using rule 54 (relation_expression -> simple_expression expression_tail .)
     COMMA           reduce using rule 54 (relation_expression -> simple_expression expression_tail .)
+    RBRACKET        reduce using rule 54 (relation_expression -> simple_expression expression_tail .)
     TO              reduce using rule 54 (relation_expression -> simple_expression expression_tail .)
     DOWNTO          reduce using rule 54 (relation_expression -> simple_expression expression_tail .)
 
@@ -1793,8 +1783,8 @@ state 83
     END_DOT         reduce using rule 62 (expression_tail -> empty .)
     END             reduce using rule 62 (expression_tail -> empty .)
     ELSE            reduce using rule 62 (expression_tail -> empty .)
-    RBRACKET        reduce using rule 62 (expression_tail -> empty .)
     COMMA           reduce using rule 62 (expression_tail -> empty .)
+    RBRACKET        reduce using rule 62 (expression_tail -> empty .)
     TO              reduce using rule 62 (expression_tail -> empty .)
     DOWNTO          reduce using rule 62 (expression_tail -> empty .)
 
@@ -1827,8 +1817,8 @@ state 84
     END_DOT         reduce using rule 86 (empty -> .)
     END             reduce using rule 86 (empty -> .)
     ELSE            reduce using rule 86 (empty -> .)
-    RBRACKET        reduce using rule 86 (empty -> .)
     COMMA           reduce using rule 86 (empty -> .)
+    RBRACKET        reduce using rule 86 (empty -> .)
     TO              reduce using rule 86 (empty -> .)
     DOWNTO          reduce using rule 86 (empty -> .)
 
@@ -1855,8 +1845,8 @@ state 85
     END_DOT         reduce using rule 63 (simple_expression -> term simple_expression_tail .)
     END             reduce using rule 63 (simple_expression -> term simple_expression_tail .)
     ELSE            reduce using rule 63 (simple_expression -> term simple_expression_tail .)
-    RBRACKET        reduce using rule 63 (simple_expression -> term simple_expression_tail .)
     COMMA           reduce using rule 63 (simple_expression -> term simple_expression_tail .)
+    RBRACKET        reduce using rule 63 (simple_expression -> term simple_expression_tail .)
     TO              reduce using rule 63 (simple_expression -> term simple_expression_tail .)
     DOWNTO          reduce using rule 63 (simple_expression -> term simple_expression_tail .)
 
@@ -1937,8 +1927,8 @@ state 88
     END_DOT         reduce using rule 66 (simple_expression_tail -> empty .)
     END             reduce using rule 66 (simple_expression_tail -> empty .)
     ELSE            reduce using rule 66 (simple_expression_tail -> empty .)
-    RBRACKET        reduce using rule 66 (simple_expression_tail -> empty .)
     COMMA           reduce using rule 66 (simple_expression_tail -> empty .)
+    RBRACKET        reduce using rule 66 (simple_expression_tail -> empty .)
     TO              reduce using rule 66 (simple_expression_tail -> empty .)
     DOWNTO          reduce using rule 66 (simple_expression_tail -> empty .)
 
@@ -1965,8 +1955,8 @@ state 89
     END_DOT         reduce using rule 67 (term -> factor term_tail .)
     END             reduce using rule 67 (term -> factor term_tail .)
     ELSE            reduce using rule 67 (term -> factor term_tail .)
-    RBRACKET        reduce using rule 67 (term -> factor term_tail .)
     COMMA           reduce using rule 67 (term -> factor term_tail .)
+    RBRACKET        reduce using rule 67 (term -> factor term_tail .)
     TO              reduce using rule 67 (term -> factor term_tail .)
     DOWNTO          reduce using rule 67 (term -> factor term_tail .)
 
@@ -2097,8 +2087,8 @@ state 94
     END_DOT         reduce using rule 72 (term_tail -> empty .)
     END             reduce using rule 72 (term_tail -> empty .)
     ELSE            reduce using rule 72 (term_tail -> empty .)
-    RBRACKET        reduce using rule 72 (term_tail -> empty .)
     COMMA           reduce using rule 72 (term_tail -> empty .)
+    RBRACKET        reduce using rule 72 (term_tail -> empty .)
     TO              reduce using rule 72 (term_tail -> empty .)
     DOWNTO          reduce using rule 72 (term_tail -> empty .)
 
@@ -2129,8 +2119,8 @@ state 95
     END_DOT         reduce using rule 73 (factor -> PLUS factor .)
     END             reduce using rule 73 (factor -> PLUS factor .)
     ELSE            reduce using rule 73 (factor -> PLUS factor .)
-    RBRACKET        reduce using rule 73 (factor -> PLUS factor .)
     COMMA           reduce using rule 73 (factor -> PLUS factor .)
+    RBRACKET        reduce using rule 73 (factor -> PLUS factor .)
     TO              reduce using rule 73 (factor -> PLUS factor .)
     DOWNTO          reduce using rule 73 (factor -> PLUS factor .)
 
@@ -2161,8 +2151,8 @@ state 96
     END_DOT         reduce using rule 74 (factor -> MINUS factor .)
     END             reduce using rule 74 (factor -> MINUS factor .)
     ELSE            reduce using rule 74 (factor -> MINUS factor .)
-    RBRACKET        reduce using rule 74 (factor -> MINUS factor .)
     COMMA           reduce using rule 74 (factor -> MINUS factor .)
+    RBRACKET        reduce using rule 74 (factor -> MINUS factor .)
     TO              reduce using rule 74 (factor -> MINUS factor .)
     DOWNTO          reduce using rule 74 (factor -> MINUS factor .)
 
@@ -2202,8 +2192,8 @@ state 98
     END_DOT         reduce using rule 78 (factor -> IDENTIFIER identifier_expression .)
     END             reduce using rule 78 (factor -> IDENTIFIER identifier_expression .)
     ELSE            reduce using rule 78 (factor -> IDENTIFIER identifier_expression .)
-    RBRACKET        reduce using rule 78 (factor -> IDENTIFIER identifier_expression .)
     COMMA           reduce using rule 78 (factor -> IDENTIFIER identifier_expression .)
+    RBRACKET        reduce using rule 78 (factor -> IDENTIFIER identifier_expression .)
     TO              reduce using rule 78 (factor -> IDENTIFIER identifier_expression .)
     DOWNTO          reduce using rule 78 (factor -> IDENTIFIER identifier_expression .)
 
@@ -2234,8 +2224,8 @@ state 99
     END_DOT         reduce using rule 79 (factor -> IDENTIFIER length_expression .)
     END             reduce using rule 79 (factor -> IDENTIFIER length_expression .)
     ELSE            reduce using rule 79 (factor -> IDENTIFIER length_expression .)
-    RBRACKET        reduce using rule 79 (factor -> IDENTIFIER length_expression .)
     COMMA           reduce using rule 79 (factor -> IDENTIFIER length_expression .)
+    RBRACKET        reduce using rule 79 (factor -> IDENTIFIER length_expression .)
     TO              reduce using rule 79 (factor -> IDENTIFIER length_expression .)
     DOWNTO          reduce using rule 79 (factor -> IDENTIFIER length_expression .)
 
@@ -2306,8 +2296,8 @@ state 101
     END_DOT         reduce using rule 85 (identifier_expression -> empty .)
     END             reduce using rule 85 (identifier_expression -> empty .)
     ELSE            reduce using rule 85 (identifier_expression -> empty .)
-    RBRACKET        reduce using rule 85 (identifier_expression -> empty .)
     COMMA           reduce using rule 85 (identifier_expression -> empty .)
+    RBRACKET        reduce using rule 85 (identifier_expression -> empty .)
     TO              reduce using rule 85 (identifier_expression -> empty .)
     DOWNTO          reduce using rule 85 (identifier_expression -> empty .)
 
@@ -2451,11 +2441,9 @@ state 107
 
 state 108
 
-    (38) identifier_assign_expression -> LBRACKET expression . RBRACKET ASSIGN assign_expression
-    (50) expression -> expression . OR and_expression
+    (38) identifier_assign_expression -> LBRACKET simple_expression . RBRACKET ASSIGN assign_expression
 
     RBRACKET        shift and go to state 145
-    OR              shift and go to state 74
 
 
 state 109
@@ -2713,8 +2701,8 @@ state 122
     END_DOT         reduce using rule 50 (expression -> expression OR and_expression .)
     END             reduce using rule 50 (expression -> expression OR and_expression .)
     ELSE            reduce using rule 50 (expression -> expression OR and_expression .)
-    RBRACKET        reduce using rule 50 (expression -> expression OR and_expression .)
     COMMA           reduce using rule 50 (expression -> expression OR and_expression .)
+    RBRACKET        reduce using rule 50 (expression -> expression OR and_expression .)
     TO              reduce using rule 50 (expression -> expression OR and_expression .)
     DOWNTO          reduce using rule 50 (expression -> expression OR and_expression .)
     AND             shift and go to state 75
@@ -2734,8 +2722,8 @@ state 123
     END_DOT         reduce using rule 52 (and_expression -> and_expression AND relation_expression .)
     END             reduce using rule 52 (and_expression -> and_expression AND relation_expression .)
     ELSE            reduce using rule 52 (and_expression -> and_expression AND relation_expression .)
-    RBRACKET        reduce using rule 52 (and_expression -> and_expression AND relation_expression .)
     COMMA           reduce using rule 52 (and_expression -> and_expression AND relation_expression .)
+    RBRACKET        reduce using rule 52 (and_expression -> and_expression AND relation_expression .)
     TO              reduce using rule 52 (and_expression -> and_expression AND relation_expression .)
     DOWNTO          reduce using rule 52 (and_expression -> and_expression AND relation_expression .)
 
@@ -2754,8 +2742,8 @@ state 124
     END_DOT         reduce using rule 56 (expression_tail -> LT simple_expression .)
     END             reduce using rule 56 (expression_tail -> LT simple_expression .)
     ELSE            reduce using rule 56 (expression_tail -> LT simple_expression .)
-    RBRACKET        reduce using rule 56 (expression_tail -> LT simple_expression .)
     COMMA           reduce using rule 56 (expression_tail -> LT simple_expression .)
+    RBRACKET        reduce using rule 56 (expression_tail -> LT simple_expression .)
     TO              reduce using rule 56 (expression_tail -> LT simple_expression .)
     DOWNTO          reduce using rule 56 (expression_tail -> LT simple_expression .)
 
@@ -2774,8 +2762,8 @@ state 125
     END_DOT         reduce using rule 57 (expression_tail -> GT simple_expression .)
     END             reduce using rule 57 (expression_tail -> GT simple_expression .)
     ELSE            reduce using rule 57 (expression_tail -> GT simple_expression .)
-    RBRACKET        reduce using rule 57 (expression_tail -> GT simple_expression .)
     COMMA           reduce using rule 57 (expression_tail -> GT simple_expression .)
+    RBRACKET        reduce using rule 57 (expression_tail -> GT simple_expression .)
     TO              reduce using rule 57 (expression_tail -> GT simple_expression .)
     DOWNTO          reduce using rule 57 (expression_tail -> GT simple_expression .)
 
@@ -2794,8 +2782,8 @@ state 126
     END_DOT         reduce using rule 58 (expression_tail -> LE simple_expression .)
     END             reduce using rule 58 (expression_tail -> LE simple_expression .)
     ELSE            reduce using rule 58 (expression_tail -> LE simple_expression .)
-    RBRACKET        reduce using rule 58 (expression_tail -> LE simple_expression .)
     COMMA           reduce using rule 58 (expression_tail -> LE simple_expression .)
+    RBRACKET        reduce using rule 58 (expression_tail -> LE simple_expression .)
     TO              reduce using rule 58 (expression_tail -> LE simple_expression .)
     DOWNTO          reduce using rule 58 (expression_tail -> LE simple_expression .)
 
@@ -2814,8 +2802,8 @@ state 127
     END_DOT         reduce using rule 59 (expression_tail -> GE simple_expression .)
     END             reduce using rule 59 (expression_tail -> GE simple_expression .)
     ELSE            reduce using rule 59 (expression_tail -> GE simple_expression .)
-    RBRACKET        reduce using rule 59 (expression_tail -> GE simple_expression .)
     COMMA           reduce using rule 59 (expression_tail -> GE simple_expression .)
+    RBRACKET        reduce using rule 59 (expression_tail -> GE simple_expression .)
     TO              reduce using rule 59 (expression_tail -> GE simple_expression .)
     DOWNTO          reduce using rule 59 (expression_tail -> GE simple_expression .)
 
@@ -2834,8 +2822,8 @@ state 128
     END_DOT         reduce using rule 60 (expression_tail -> NE simple_expression .)
     END             reduce using rule 60 (expression_tail -> NE simple_expression .)
     ELSE            reduce using rule 60 (expression_tail -> NE simple_expression .)
-    RBRACKET        reduce using rule 60 (expression_tail -> NE simple_expression .)
     COMMA           reduce using rule 60 (expression_tail -> NE simple_expression .)
+    RBRACKET        reduce using rule 60 (expression_tail -> NE simple_expression .)
     TO              reduce using rule 60 (expression_tail -> NE simple_expression .)
     DOWNTO          reduce using rule 60 (expression_tail -> NE simple_expression .)
 
@@ -2854,8 +2842,8 @@ state 129
     END_DOT         reduce using rule 61 (expression_tail -> EQUAL simple_expression .)
     END             reduce using rule 61 (expression_tail -> EQUAL simple_expression .)
     ELSE            reduce using rule 61 (expression_tail -> EQUAL simple_expression .)
-    RBRACKET        reduce using rule 61 (expression_tail -> EQUAL simple_expression .)
     COMMA           reduce using rule 61 (expression_tail -> EQUAL simple_expression .)
+    RBRACKET        reduce using rule 61 (expression_tail -> EQUAL simple_expression .)
     TO              reduce using rule 61 (expression_tail -> EQUAL simple_expression .)
     DOWNTO          reduce using rule 61 (expression_tail -> EQUAL simple_expression .)
 
@@ -2874,8 +2862,8 @@ state 130
     END_DOT         reduce using rule 55 (relation_expression -> NOT simple_expression expression_tail .)
     END             reduce using rule 55 (relation_expression -> NOT simple_expression expression_tail .)
     ELSE            reduce using rule 55 (relation_expression -> NOT simple_expression expression_tail .)
-    RBRACKET        reduce using rule 55 (relation_expression -> NOT simple_expression expression_tail .)
     COMMA           reduce using rule 55 (relation_expression -> NOT simple_expression expression_tail .)
+    RBRACKET        reduce using rule 55 (relation_expression -> NOT simple_expression expression_tail .)
     TO              reduce using rule 55 (relation_expression -> NOT simple_expression expression_tail .)
     DOWNTO          reduce using rule 55 (relation_expression -> NOT simple_expression expression_tail .)
 
@@ -2906,8 +2894,8 @@ state 131
     END_DOT         reduce using rule 86 (empty -> .)
     END             reduce using rule 86 (empty -> .)
     ELSE            reduce using rule 86 (empty -> .)
-    RBRACKET        reduce using rule 86 (empty -> .)
     COMMA           reduce using rule 86 (empty -> .)
+    RBRACKET        reduce using rule 86 (empty -> .)
     TO              reduce using rule 86 (empty -> .)
     DOWNTO          reduce using rule 86 (empty -> .)
 
@@ -2940,8 +2928,8 @@ state 132
     END_DOT         reduce using rule 86 (empty -> .)
     END             reduce using rule 86 (empty -> .)
     ELSE            reduce using rule 86 (empty -> .)
-    RBRACKET        reduce using rule 86 (empty -> .)
     COMMA           reduce using rule 86 (empty -> .)
+    RBRACKET        reduce using rule 86 (empty -> .)
     TO              reduce using rule 86 (empty -> .)
     DOWNTO          reduce using rule 86 (empty -> .)
 
@@ -2980,8 +2968,8 @@ state 133
     END_DOT         reduce using rule 86 (empty -> .)
     END             reduce using rule 86 (empty -> .)
     ELSE            reduce using rule 86 (empty -> .)
-    RBRACKET        reduce using rule 86 (empty -> .)
     COMMA           reduce using rule 86 (empty -> .)
+    RBRACKET        reduce using rule 86 (empty -> .)
     TO              reduce using rule 86 (empty -> .)
     DOWNTO          reduce using rule 86 (empty -> .)
 
@@ -3020,8 +3008,8 @@ state 134
     END_DOT         reduce using rule 86 (empty -> .)
     END             reduce using rule 86 (empty -> .)
     ELSE            reduce using rule 86 (empty -> .)
-    RBRACKET        reduce using rule 86 (empty -> .)
     COMMA           reduce using rule 86 (empty -> .)
+    RBRACKET        reduce using rule 86 (empty -> .)
     TO              reduce using rule 86 (empty -> .)
     DOWNTO          reduce using rule 86 (empty -> .)
 
@@ -3060,8 +3048,8 @@ state 135
     END_DOT         reduce using rule 86 (empty -> .)
     END             reduce using rule 86 (empty -> .)
     ELSE            reduce using rule 86 (empty -> .)
-    RBRACKET        reduce using rule 86 (empty -> .)
     COMMA           reduce using rule 86 (empty -> .)
+    RBRACKET        reduce using rule 86 (empty -> .)
     TO              reduce using rule 86 (empty -> .)
     DOWNTO          reduce using rule 86 (empty -> .)
 
@@ -3100,8 +3088,8 @@ state 136
     END_DOT         reduce using rule 86 (empty -> .)
     END             reduce using rule 86 (empty -> .)
     ELSE            reduce using rule 86 (empty -> .)
-    RBRACKET        reduce using rule 86 (empty -> .)
     COMMA           reduce using rule 86 (empty -> .)
+    RBRACKET        reduce using rule 86 (empty -> .)
     TO              reduce using rule 86 (empty -> .)
     DOWNTO          reduce using rule 86 (empty -> .)
 
@@ -3134,8 +3122,8 @@ state 137
     END_DOT         reduce using rule 75 (factor -> LPAREN expression RPAREN .)
     END             reduce using rule 75 (factor -> LPAREN expression RPAREN .)
     ELSE            reduce using rule 75 (factor -> LPAREN expression RPAREN .)
-    RBRACKET        reduce using rule 75 (factor -> LPAREN expression RPAREN .)
     COMMA           reduce using rule 75 (factor -> LPAREN expression RPAREN .)
+    RBRACKET        reduce using rule 75 (factor -> LPAREN expression RPAREN .)
     TO              reduce using rule 75 (factor -> LPAREN expression RPAREN .)
     DOWNTO          reduce using rule 75 (factor -> LPAREN expression RPAREN .)
 
@@ -3209,7 +3197,7 @@ state 144
 
 state 145
 
-    (38) identifier_assign_expression -> LBRACKET expression RBRACKET . ASSIGN assign_expression
+    (38) identifier_assign_expression -> LBRACKET simple_expression RBRACKET . ASSIGN assign_expression
 
     ASSIGN          shift and go to state 167
 
@@ -3376,8 +3364,8 @@ state 156
     END_DOT         reduce using rule 64 (simple_expression_tail -> PLUS term simple_expression_tail .)
     END             reduce using rule 64 (simple_expression_tail -> PLUS term simple_expression_tail .)
     ELSE            reduce using rule 64 (simple_expression_tail -> PLUS term simple_expression_tail .)
-    RBRACKET        reduce using rule 64 (simple_expression_tail -> PLUS term simple_expression_tail .)
     COMMA           reduce using rule 64 (simple_expression_tail -> PLUS term simple_expression_tail .)
+    RBRACKET        reduce using rule 64 (simple_expression_tail -> PLUS term simple_expression_tail .)
     TO              reduce using rule 64 (simple_expression_tail -> PLUS term simple_expression_tail .)
     DOWNTO          reduce using rule 64 (simple_expression_tail -> PLUS term simple_expression_tail .)
 
@@ -3402,8 +3390,8 @@ state 157
     END_DOT         reduce using rule 65 (simple_expression_tail -> MINUS term simple_expression_tail .)
     END             reduce using rule 65 (simple_expression_tail -> MINUS term simple_expression_tail .)
     ELSE            reduce using rule 65 (simple_expression_tail -> MINUS term simple_expression_tail .)
-    RBRACKET        reduce using rule 65 (simple_expression_tail -> MINUS term simple_expression_tail .)
     COMMA           reduce using rule 65 (simple_expression_tail -> MINUS term simple_expression_tail .)
+    RBRACKET        reduce using rule 65 (simple_expression_tail -> MINUS term simple_expression_tail .)
     TO              reduce using rule 65 (simple_expression_tail -> MINUS term simple_expression_tail .)
     DOWNTO          reduce using rule 65 (simple_expression_tail -> MINUS term simple_expression_tail .)
 
@@ -3430,8 +3418,8 @@ state 158
     END_DOT         reduce using rule 68 (term_tail -> TIMES factor term_tail .)
     END             reduce using rule 68 (term_tail -> TIMES factor term_tail .)
     ELSE            reduce using rule 68 (term_tail -> TIMES factor term_tail .)
-    RBRACKET        reduce using rule 68 (term_tail -> TIMES factor term_tail .)
     COMMA           reduce using rule 68 (term_tail -> TIMES factor term_tail .)
+    RBRACKET        reduce using rule 68 (term_tail -> TIMES factor term_tail .)
     TO              reduce using rule 68 (term_tail -> TIMES factor term_tail .)
     DOWNTO          reduce using rule 68 (term_tail -> TIMES factor term_tail .)
 
@@ -3458,8 +3446,8 @@ state 159
     END_DOT         reduce using rule 69 (term_tail -> DIVIDE factor term_tail .)
     END             reduce using rule 69 (term_tail -> DIVIDE factor term_tail .)
     ELSE            reduce using rule 69 (term_tail -> DIVIDE factor term_tail .)
-    RBRACKET        reduce using rule 69 (term_tail -> DIVIDE factor term_tail .)
     COMMA           reduce using rule 69 (term_tail -> DIVIDE factor term_tail .)
+    RBRACKET        reduce using rule 69 (term_tail -> DIVIDE factor term_tail .)
     TO              reduce using rule 69 (term_tail -> DIVIDE factor term_tail .)
     DOWNTO          reduce using rule 69 (term_tail -> DIVIDE factor term_tail .)
 
@@ -3486,8 +3474,8 @@ state 160
     END_DOT         reduce using rule 70 (term_tail -> MOD factor term_tail .)
     END             reduce using rule 70 (term_tail -> MOD factor term_tail .)
     ELSE            reduce using rule 70 (term_tail -> MOD factor term_tail .)
-    RBRACKET        reduce using rule 70 (term_tail -> MOD factor term_tail .)
     COMMA           reduce using rule 70 (term_tail -> MOD factor term_tail .)
+    RBRACKET        reduce using rule 70 (term_tail -> MOD factor term_tail .)
     TO              reduce using rule 70 (term_tail -> MOD factor term_tail .)
     DOWNTO          reduce using rule 70 (term_tail -> MOD factor term_tail .)
 
@@ -3514,8 +3502,8 @@ state 161
     END_DOT         reduce using rule 71 (term_tail -> REAL_DIVIDE factor term_tail .)
     END             reduce using rule 71 (term_tail -> REAL_DIVIDE factor term_tail .)
     ELSE            reduce using rule 71 (term_tail -> REAL_DIVIDE factor term_tail .)
-    RBRACKET        reduce using rule 71 (term_tail -> REAL_DIVIDE factor term_tail .)
     COMMA           reduce using rule 71 (term_tail -> REAL_DIVIDE factor term_tail .)
+    RBRACKET        reduce using rule 71 (term_tail -> REAL_DIVIDE factor term_tail .)
     TO              reduce using rule 71 (term_tail -> REAL_DIVIDE factor term_tail .)
     DOWNTO          reduce using rule 71 (term_tail -> REAL_DIVIDE factor term_tail .)
 
@@ -3546,8 +3534,8 @@ state 162
     END_DOT         reduce using rule 84 (identifier_expression -> LBRACKET expression RBRACKET .)
     END             reduce using rule 84 (identifier_expression -> LBRACKET expression RBRACKET .)
     ELSE            reduce using rule 84 (identifier_expression -> LBRACKET expression RBRACKET .)
-    RBRACKET        reduce using rule 84 (identifier_expression -> LBRACKET expression RBRACKET .)
     COMMA           reduce using rule 84 (identifier_expression -> LBRACKET expression RBRACKET .)
+    RBRACKET        reduce using rule 84 (identifier_expression -> LBRACKET expression RBRACKET .)
     TO              reduce using rule 84 (identifier_expression -> LBRACKET expression RBRACKET .)
     DOWNTO          reduce using rule 84 (identifier_expression -> LBRACKET expression RBRACKET .)
 
@@ -3578,8 +3566,8 @@ state 163
     END_DOT         reduce using rule 83 (length_expression -> LPAREN IDENTIFIER RPAREN .)
     END             reduce using rule 83 (length_expression -> LPAREN IDENTIFIER RPAREN .)
     ELSE            reduce using rule 83 (length_expression -> LPAREN IDENTIFIER RPAREN .)
-    RBRACKET        reduce using rule 83 (length_expression -> LPAREN IDENTIFIER RPAREN .)
     COMMA           reduce using rule 83 (length_expression -> LPAREN IDENTIFIER RPAREN .)
+    RBRACKET        reduce using rule 83 (length_expression -> LPAREN IDENTIFIER RPAREN .)
     TO              reduce using rule 83 (length_expression -> LPAREN IDENTIFIER RPAREN .)
     DOWNTO          reduce using rule 83 (length_expression -> LPAREN IDENTIFIER RPAREN .)
 
@@ -3673,7 +3661,7 @@ state 166
 
 state 167
 
-    (38) identifier_assign_expression -> LBRACKET expression RBRACKET ASSIGN . assign_expression
+    (38) identifier_assign_expression -> LBRACKET simple_expression RBRACKET ASSIGN . assign_expression
     (49) assign_expression -> . expression
     (50) expression -> . expression OR and_expression
     (51) expression -> . and_expression
@@ -3705,11 +3693,11 @@ state 167
     STRING          shift and go to state 52
     FALSE           shift and go to state 53
 
-    expression                     shift and go to state 107
+    simple_expression              shift and go to state 41
     assign_expression              shift and go to state 179
+    expression                     shift and go to state 107
     and_expression                 shift and go to state 39
     relation_expression            shift and go to state 40
-    simple_expression              shift and go to state 41
     term                           shift and go to state 43
     factor                         shift and go to state 44
 
@@ -3864,12 +3852,12 @@ state 178
 
 state 179
 
-    (38) identifier_assign_expression -> LBRACKET expression RBRACKET ASSIGN assign_expression .
+    (38) identifier_assign_expression -> LBRACKET simple_expression RBRACKET ASSIGN assign_expression .
 
-    SEMICOLON       reduce using rule 38 (identifier_assign_expression -> LBRACKET expression RBRACKET ASSIGN assign_expression .)
-    END_DOT         reduce using rule 38 (identifier_assign_expression -> LBRACKET expression RBRACKET ASSIGN assign_expression .)
-    END             reduce using rule 38 (identifier_assign_expression -> LBRACKET expression RBRACKET ASSIGN assign_expression .)
-    ELSE            reduce using rule 38 (identifier_assign_expression -> LBRACKET expression RBRACKET ASSIGN assign_expression .)
+    SEMICOLON       reduce using rule 38 (identifier_assign_expression -> LBRACKET simple_expression RBRACKET ASSIGN assign_expression .)
+    END_DOT         reduce using rule 38 (identifier_assign_expression -> LBRACKET simple_expression RBRACKET ASSIGN assign_expression .)
+    END             reduce using rule 38 (identifier_assign_expression -> LBRACKET simple_expression RBRACKET ASSIGN assign_expression .)
+    ELSE            reduce using rule 38 (identifier_assign_expression -> LBRACKET simple_expression RBRACKET ASSIGN assign_expression .)
 
 
 state 180
