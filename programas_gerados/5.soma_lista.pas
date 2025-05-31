@@ -15,24 +15,6 @@ FORSTART0:
      PUSHI 5
      INFEQ
 JZ FOREND0
-     PUSHST 0
-     PUSHFP
-       LOAD -2
-      PUSHI 1
-       SUB
-     READ
-      ATOI
-      STOREN
-     PUSHFP
-       LOAD -1
-     PUSHST 0
-     PUSHFP
-       LOAD -2
-      PUSHI 1
-       SUB
-      LOADN
-     ADD
-       STOREG 2
      PUSHFP
      LOAD-2
      PUSHI 1

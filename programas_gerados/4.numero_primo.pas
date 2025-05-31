@@ -36,9 +36,6 @@ WHILESTART0:
 JZ ELSE0
      PUSHI 0
        STOREG 2
-     JUMP ENDIF0
-ELSE0:
-ENDIF0:
      PUSHFP
        LOAD -2
      PUSHI 1

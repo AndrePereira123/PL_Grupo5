@@ -176,14 +176,78 @@ def p_expressions_tail(p):
 
 #################################### statements ##########################################
 
-def p_statement(p):
-    '''statement : IDENTIFIER identifier_assign_expression  
+def p_statement(p): 
+    '''statement : open_statement
+                 | closed_statement'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = []
+
+def p_open_statement(p):
+    '''open_statement : IF if_condition THEN code_or_statement
+                      | IF if_condition THEN code_or_statement ELSE open_statement
+                      | WHILE if_condition DO open_statement
+                      | FOR for_condition DO open_statement '''
+    if p[1].lower() == 'if':
+        global numero_ciclos_if
+        type1, code1 = p[2]
+        
+        code = code1 + ["JZ ELSE" + str(numero_ciclos_if) + "\n"]
+
+        code += p[4] if p[4] is not None else [] ## codigo do if
+
+        if len(p) > 5:
+            codigo_else = p[6] if p[6] is not None else []
+            code += ["     JUMP ENDIF" + str(numero_ciclos_if) + "\n"] + ["ELSE" + str(numero_ciclos_if) + ":\n"] + codigo_else + ["ENDIF" + str(numero_ciclos_if) + ":\n"]
+            
+        
+        numero_ciclos_if += 1
+        p[0] = code
+    elif p[1].lower() == 'while':
+
+        global numero_ciclos_while
+        type, code1 = p[2]
+        if type.lower() != 'boolean':
+            raise TypeError("Condição do WHILE tem de ser boolean")
+        code2 = p[4]  # assumindo 'WHILE cond DO if_code'
+        code2 += [f"     JUMP WHILESTART{numero_ciclos_while}\n"]
+        code2 += [f"WHILEEND{numero_ciclos_while}:\n"]
+
+        code = []
+        code += [f"WHILESTART{numero_ciclos_while}:\n"]
+        code += code1
+        code += [f"     JZ WHILEEND{numero_ciclos_while}\n"]
+        code += code2
+
+        
+        numero_ciclos_while += 1
+        p[0] = code
+    elif p[1].lower() == 'for':
+        global numero_ciclos_for, index_variavel_ciclo_for , index
+        type1, code1 = p[2]
+        
+        code = code1 + ["JZ FOREND" + str(numero_ciclos_for) + "\n"]
+
+        distancia = index_variavel_ciclo_for[numero_ciclos_for]
+        profundidade = distancia + index
+        code += ["     PUSHFP\n     LOAD" + str(distancia) + f"\n     PUSHI {tipo_ciclo_for[numero_ciclos_for]}1\n     ADD\n     STOREG " + str(profundidade) + "\n"]
+        code += ["     JUMP FORSTART" + str(numero_ciclos_for) + "\n"] + ["FOREND" + str(numero_ciclos_for) + ":\n"]
+        
+        
+        numero_ciclos_for += 1
+        p[0] = code
+
+
+
+def p_closed_statement(p):
+    '''closed_statement : IDENTIFIER identifier_assign_expression  
                 | WRITELN write_statement 
                 | WRITE write_statement 
                 | READLN readln_statement 
-                | IF if_condition THEN if_code 
-                | FOR for_condition DO for_code
-                | WHILE if_condition DO while_code''' 
+                | IF if_condition THEN code_or_statement ELSE code_or_statement
+                | FOR for_condition DO code_or_statement
+                | WHILE if_condition DO code_or_statement''' 
     
     if (p.slice[1].type == 'IDENTIFIER'):
         global variaveis, index
@@ -255,17 +319,28 @@ def p_statement(p):
         type1, code1 = p[2]
         
         code = code1 + ["JZ ELSE" + str(numero_ciclos_if) + "\n"]
-        code += p[4]
+
+
+        code += p[4] if p[4] is not None else [] ## codigo do if
+        codigo_else = p[6] if p[6] is not None else []
+        code += ["     JUMP ENDIF" + str(numero_ciclos_if) + "\n"] + ["ELSE" + str(numero_ciclos_if) + ":\n"] + codigo_else + ["ENDIF" + str(numero_ciclos_if) + ":\n"]
+        
         
         numero_ciclos_if += 1
         p[0] = code
 
     elif p[1].lower() == 'for':
-        global numero_ciclos_for
+        global numero_ciclos_for, index_variavel_ciclo_for , index
         type1, code1 = p[2]
         
         code = code1 + ["JZ FOREND" + str(numero_ciclos_for) + "\n"]
-        code += p[4]
+
+
+        distancia = index_variavel_ciclo_for[numero_ciclos_for]
+        profundidade = distancia + index
+        code += ["     PUSHFP\n     LOAD" + str(distancia) + f"\n     PUSHI {tipo_ciclo_for[numero_ciclos_for]}1\n     ADD\n     STOREG " + str(profundidade) + "\n"]
+        code += ["     JUMP FORSTART" + str(numero_ciclos_for) + "\n"] + ["FOREND" + str(numero_ciclos_for) + ":\n"]
+        
         
         numero_ciclos_for += 1
         p[0] = code
@@ -276,6 +351,8 @@ def p_statement(p):
         if type.lower() != 'boolean':
             raise TypeError("Condição do WHILE tem de ser boolean")
         code2 = p[4]  # assumindo 'WHILE cond DO if_code'
+        code2 += [f"     JUMP WHILESTART{numero_ciclos_while}\n"]
+        code2 += [f"WHILEEND{numero_ciclos_while}:\n"]
 
         code = []
         code += [f"WHILESTART{numero_ciclos_while}:\n"]
@@ -324,37 +401,6 @@ def p_identifier_assign_expression(p):
             # inserir o valor que queremos dar bind
             p[0] = ('array', (actual_type, commands))               
 
-
-def p_while_code(p):
-    '''while_code : dotless_code 
-                | statement 
-                | empty'''
-    if len(p) == 2:
-        global numero_ciclos_while
-        code = p[1] if p[1] is not None else [] 
-
-        code += [f"     JUMP WHILESTART{numero_ciclos_while}\n"]
-        code += [f"WHILEEND{numero_ciclos_while}:\n"]
-
-        p[0] = code
-    else:
-        p[0] = []
-
-
-def p_if_code(p):
-    '''if_code : dotless_code opt_else
-               | statement opt_else
-               | empty'''
-    if len(p) == 3:
-        global numero_ciclos_if
-        code = p[1] if p[1] is not None else [] ## codigo do if
-        codigo_else = p[2] if p[2] is not None else []
-        code += ["     JUMP ENDIF" + str(numero_ciclos_if) + "\n"] + ["ELSE" + str(numero_ciclos_if) + ":\n"] + codigo_else + ["ENDIF" + str(numero_ciclos_if) + ":\n"]
-        
-        p[0] = code
-    else:
-        p[0] = []
-
 def p_for_condition(p):
     '''for_condition : expression ASSIGN expression to_expression'''  ## x := 0 to 10       ou       x := y+2 to z*2 
 
@@ -401,38 +447,13 @@ def p_to_expression(p):
     else:
         p[0] = []
 
-def p_for_code(p):
-    '''for_code : dotless_code 
-               | statement 
-               | empty'''
-    if len(p) == 2:
-        global numero_ciclos_for, index_variavel_ciclo_for , index
-        code = p[1] if p[1] is not None else [] 
-
-        distancia = index_variavel_ciclo_for[numero_ciclos_for]
-        profundidade = distancia + index
-        code += ["     PUSHFP\n     LOAD" + str(distancia) + f"\n     PUSHI {tipo_ciclo_for[numero_ciclos_for]}1\n     ADD\n     STOREG " + str(profundidade) + "\n"]
-                                                           # o tipo de ciclo for guarda um - se o ciclo for "for downto"
-        code += ["     JUMP FORSTART" + str(numero_ciclos_for) + "\n"] + ["FOREND" + str(numero_ciclos_for) + ":\n"]
-        
-        p[0] = code
-    else:
-        p[0] = []
-
-def p_opt_else(p):
-    '''opt_else : ELSE code_or_statement
-                | empty'''
-    if len(p) == 3:
-        p[0] = p[2] if p[2] is not None else []
-    else:
-        p[0] = []
-
 def p_code_or_statement(p):
     '''code_or_statement : dotless_code
-                         | statement'''
-    p[0] = p[1] if p[1] is not None else []
-
-
+                         | closed_statement'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = []
 
 def p_if_condition(p):
     '''if_condition : expression'''
