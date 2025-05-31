@@ -192,42 +192,45 @@ def p_open_statement(p):
     if p[1].lower() == 'if':
         global numero_ciclos_if
         type1, code1 = p[2]
+        if type1.lower() != 'boolean':  
+            raise TypeError("Condição do IF tem de ser boolean")
         
-        code = code1 + ["JZ ELSE" + str(numero_ciclos_if) + "\n"]
+        if len(p) == 5:  # IF condition THEN statement (sem else)
+            code = code1 + [f"JZ ENDIF{numero_ciclos_if}\n"]
+            code += p[4] if p[4] is not None else []
+            code += [f"ENDIF{numero_ciclos_if}:\n"]
 
-        code += p[4] if p[4] is not None else [] ## codigo do if
-
-        if len(p) > 5:
-            codigo_else = p[6] if p[6] is not None else []
-            code += ["     JUMP ENDIF" + str(numero_ciclos_if) + "\n"] + ["ELSE" + str(numero_ciclos_if) + ":\n"] + codigo_else + ["ENDIF" + str(numero_ciclos_if) + ":\n"]
-            
+        else:  # IF condition THEN statement ELSE statement
+            code = code1 + [f"JZ ELSE{numero_ciclos_if}\n"]
+            code += p[4] if p[4] is not None else []
+            code += [f"JUMP ENDIF{numero_ciclos_if}\n"]
+            code += [f"ELSE{numero_ciclos_if}:\n"]
+            code += p[6] if p[6] is not None else []
+            code += [f"ENDIF{numero_ciclos_if}:\n"]
         
         numero_ciclos_if += 1
         p[0] = code
+
     elif p[1].lower() == 'while':
-
-        global numero_ciclos_while
-        type, code1 = p[2]
-        if type.lower() != 'boolean':
+        type1, code1 = p[2]
+        if type1.lower() != 'boolean':
             raise TypeError("Condição do WHILE tem de ser boolean")
-        code2 = p[4]  # assumindo 'WHILE cond DO if_code'
-        code2 += [f"     JUMP WHILESTART{numero_ciclos_while}\n"]
-        code2 += [f"WHILEEND{numero_ciclos_while}:\n"]
-
-        code = []
-        code += [f"WHILESTART{numero_ciclos_while}:\n"]
+        
+        code = [f"WHILESTART{numero_ciclos_while}:\n"]
         code += code1
-        code += [f"     JZ WHILEEND{numero_ciclos_while}\n"]
-        code += code2
-
+        code += [f"JZ WHILEEND{numero_ciclos_while}\n"]
+        code += p[4] if p[4] is not None else []  # Código do corpo
+        code += [f"JUMP WHILESTART{numero_ciclos_while}\n"]
+        code += [f"WHILEEND{numero_ciclos_while}:\n"]
         
         numero_ciclos_while += 1
         p[0] = code
+        
     elif p[1].lower() == 'for':
         global numero_ciclos_for, index_variavel_ciclo_for , index
         type1, code1 = p[2]
         
-        code = code1 + ["JZ FOREND" + str(numero_ciclos_for) + "\n"]
+        code = code1 + ["JZ FOREND" + str(numero_ciclos_for) + "\n"] + p[4] if p[4] is not None else [] ## codigo do for
 
         distancia = index_variavel_ciclo_for[numero_ciclos_for]
         profundidade = distancia + index
@@ -333,7 +336,7 @@ def p_closed_statement(p):
         global numero_ciclos_for, index_variavel_ciclo_for , index
         type1, code1 = p[2]
         
-        code = code1 + ["JZ FOREND" + str(numero_ciclos_for) + "\n"]
+        code = code1 + ["JZ FOREND" + str(numero_ciclos_for) + "\n"] + p[4] if p[4] is not None else [] ## codigo do for
 
 
         distancia = index_variavel_ciclo_for[numero_ciclos_for]
@@ -347,19 +350,16 @@ def p_closed_statement(p):
 
     elif p[1].lower() == 'while':
         global numero_ciclos_while
-        type, code1 = p[2]
-        if type.lower() != 'boolean':
+        type1, code1 = p[2]
+        if type1.lower() != 'boolean':
             raise TypeError("Condição do WHILE tem de ser boolean")
-        code2 = p[4]  # assumindo 'WHILE cond DO if_code'
-        code2 += [f"     JUMP WHILESTART{numero_ciclos_while}\n"]
-        code2 += [f"WHILEEND{numero_ciclos_while}:\n"]
-
-        code = []
-        code += [f"WHILESTART{numero_ciclos_while}:\n"]
+        
+        code = [f"WHILESTART{numero_ciclos_while}:\n"]
         code += code1
-        code += [f"     JZ WHILEEND{numero_ciclos_while}\n"]
-        code += code2
-
+        code += [f"JZ WHILEEND{numero_ciclos_while}\n"]
+        code += p[4] if p[4] is not None else []  # Código do corpo
+        code += [f"JUMP WHILESTART{numero_ciclos_while}\n"]
+        code += [f"WHILEEND{numero_ciclos_while}:\n"]
         
         numero_ciclos_while += 1
         p[0] = code
@@ -610,7 +610,7 @@ def p_readln_statement(p):
                 "     STOREN\n",
                 "     PUSHI 1\n",
                 "     ADD\n",               
-                "     DUP 1\n",          
+                "     DUP 1\n",
                 "     STOREL 2\n",
                 "     PUSHL 1\n", 
                 "     INF\n",               

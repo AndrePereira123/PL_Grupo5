@@ -22,6 +22,12 @@ FORSTART0:
      INFEQ
 JZ FOREND0
      PUSHFP
+       LOAD -1
+     PUSHFP
+       LOAD -2
+     MUL
+       STOREG 2
+     PUSHFP
      LOAD-2
      PUSHI 1
      ADD
