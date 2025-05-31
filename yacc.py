@@ -15,6 +15,7 @@ numero_ciclos_while = 0 ## numero de ciclos whiles
 index_variavel_ciclo_for = {} ## profundidade da variavel do ciclo for
 tipo_ciclo_for = {} ## tipo de ciclo (downto ou to  )
 ## index = valor na maquina virtual 
+ 
 
 
 def p_file(p):
@@ -558,6 +559,7 @@ def p_write_statement(p):
                 p[0] += linhas_calculo + ["       STRF\n"]
             elif type.lower() == 'boolean':
                 p[0] += linhas_calculo + ["       WRITEI\n"]
+                check = True
             
         if not first_iteration:
             p[0] += ["     CONCAT\n"]
@@ -686,12 +688,21 @@ def p_and_expression(p):                                            ## (AND... A
         p[0] = p[1]
 
 def p_relation_expression(p):                                               ## (X) => (10 + 20) || (10 < (20 + 10)) etc.
-    '''relation_expression : simple_expression expression_tail'''
-    if p[2] is None:
+    '''relation_expression : simple_expression expression_tail
+                           | NOT simple_expression expression_tail'''
+    if len(p) == 3 and p[2] is None:
         p[0] = p[1]
+    elif len(p) == 4 and p[3] is None :
+        type1, code1 = p[2]
+        if type1.lower() != 'boolean':
+            raise TypeError("NOT only allowed for booleans")
+        p[0] = ('boolean', code1 + ["     NOT\n"])
     else:
-        op, type2, code2 = p[2]
-        type1, code1 = p[1]
+
+        i = 1 if len(p) == 4 else 0
+
+        op, type2, code2 = p[2 + i]
+        type1, code1 = p[1 + i]
         
         if type1.lower() == type2.lower():
             pass
@@ -733,7 +744,7 @@ def p_relation_expression(p):                                               ## (
         else:
             if type2.lower() == 'string_pure':
                 if len(code2) == 1: # só funciona para comparar elementos de uma string
-                    code2 = [f"      PUSHS \"{p[2][2]}\"\n     CHRCODE\n"]
+                    code2 = [f"      PUSHS \"{p[2 + i][2]}\"\n     CHRCODE\n"]
                 else:
                     raise TypeError(f"O compilador não suportar comprar char com strings")
                 
@@ -748,8 +759,13 @@ def p_relation_expression(p):                                               ## (
             else:
                 raise TypeError(f"O compilador não suporta comparar {type1} com {type2}.")
 
+        
         code = code1 + code2 + [f"     {instr}\n"]
+        if p[1] == 'NOT':
+             code = code + ["     NOT\n"]
+
         p[0] = ('boolean', code)
+        
 
 
 def p_expression_tail(p):

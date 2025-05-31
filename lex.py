@@ -3,9 +3,8 @@ import re
 
 error_count = 0  # Contador de erros
 
-# Lista de tokens
+# Lista de tokens (SEM COMMENT)
 tokens = (
-    'COMMENT',
     'INTEGER',
     'PLUS',
     'MINUS',
@@ -48,8 +47,6 @@ tokens = (
     'FOR',
     'TO',
     'DOWNTO',
-    'FUNCTION',
-    'PROCEDURE',
     'ARRAY',
     'OF',
     'WRITE',
@@ -83,6 +80,14 @@ t_EQUAL = r'='
 t_LT = r'<'
 t_GT = r'>'
 
+
+
+# COMENTÁRIOS - Colocar no início das funções de tokens
+def t_COMMENT(t):
+    r'\{[^}]*\}|\(\*([^*]|\*(?!\)))*\*\)|//.*'
+    pass  # Ignorar comentários
+
+# Palavras-chave (por ordem de precedência)
 def t_PROGRAM(t):
     r'program'
     t.type = 'PROGRAM'
@@ -168,16 +173,6 @@ def t_TO(t):
     t.type = 'TO'
     return t
 
-def t_FUNCTION(t):
-    r'function'
-    t.type = 'FUNCTION'
-    return t
-
-def t_PROCEDURE(t):
-    r'procedure'
-    t.type = 'PROCEDURE'
-    return t
-
 def t_ARRAY(t):
     r'array'
     t.type = 'ARRAY'
@@ -244,11 +239,6 @@ def t_IDENTIFIER(t):
     t.type = 'IDENTIFIER'
     return t
 
-# Comentários
-def t_COMMENT(t):
-    r'\{[^}]*\}|\(\*[^*]*\*\)'
-    pass  # Ignorar comentários
-
 # Strings
 def t_STRING(t):
     r"'([^\\\n]|(\\.))*?'"
@@ -287,7 +277,7 @@ lexer = lex.lex(reflags=re.IGNORECASE)
 
 # Testar o lexer com um exemplo de código Pascal
 if __name__ == "__main__":
-    file = open("programas_pascal/6.binario_para_decimal.pas", "r", encoding="utf-8")
+    file = open("programas_pascal/1.hello_world.pas", "r", encoding="utf-8")
     data = file.read()
     file.close()
 

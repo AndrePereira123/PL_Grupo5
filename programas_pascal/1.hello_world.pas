@@ -4,7 +4,7 @@ var
     n: Real;
     s: String;
 begin
-    writeln('Ola, Mundo!', 12.23);
+    writeln('Ola, Mundo!', 12.23);  
     ReadLn(i);
     writeln(i);
     writeln('Ola, Mundo!', i);

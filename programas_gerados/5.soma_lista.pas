@@ -18,8 +18,8 @@ JZ FOREND0
      PUSHST 0
      PUSHFP
        LOAD -2
-      PUSHI 1
-       SUB
+     PUSHI 1
+     SUB
      READ
       ATOI
       STOREN
@@ -28,8 +28,8 @@ JZ FOREND0
      PUSHST 0
      PUSHFP
        LOAD -2
-      PUSHI 1
-       SUB
+     PUSHI 1
+     SUB
       LOADN
      ADD
        STOREG 2
