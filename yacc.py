@@ -197,7 +197,7 @@ def p_statement(p):
             menor, maior, tamanho, struct_index, elements_type = index_var
             actual_type, commands = expression
 
-            if (tipo_guardado.lower() == actual_type.lower()):
+            if (elements_type.lower() == actual_type.lower()):
                 commands_to_output = []
                 commands_to_output += [f'     PUSHST {struct_index}\n']
                 commands_to_output += commands
@@ -212,7 +212,11 @@ def p_statement(p):
         else:
             if tipo_guardado == 'string':  ## se for string => simples atribuição
                 (menor, maior, tamanho, struct_index, elements_type) = index_var
-                (actual_type, (commands, actual_size)) = p[2]
+                (actual_type, tail) = p[2]
+                if (tipo_guardado != actual_type.lower()):
+                    raise TypeError(f'A atribuição não é válida. Não podes atribuir {actual_type} a {tipo_guardado}')
+                
+                (commands, actual_size) = tail
                 
                 if (actual_type.lower() == tipo_guardado):
                     commands_to_output = []
@@ -540,6 +544,12 @@ def p_write_statement(p):
             
             check = True
 
+        # char de uma string
+        elif type.lower() == 'char':
+            linhas_calculo += ["        WRITECHR\n"]
+            p[0] = linhas_calculo
+            check = True
+
         # string "real"
         elif type.lower() == 'string_pure':
             p[0] += ["     PUSHS \"" + linhas_calculo + "\"\n"]
@@ -690,7 +700,7 @@ def p_relation_expression(p):                                               ## (
         type1, code1 = p[1]
         
         if type1.lower() == type2.lower():
-            pass
+            pass    
         elif (type1.lower(), type2.lower()) in [('integer', 'real'), ('real', 'integer')]:
             # Converte integer para real
             if type1.lower() == 'integer':
@@ -702,28 +712,40 @@ def p_relation_expression(p):                                               ## (
         else:
             raise TypeError(f"Tipo de dado inválido para comparação: {type1} {op} {type2}")
 
-        
-        # Seleciona instrução de comparação
-        if type1.lower() == 'integer':
-            instr = {
-                '<': 'INF',
-                '>': 'SUP',
-                '<=': 'INFEQ',
-                '>=': 'SUPEQ',
-                '<>': 'EQUAL\n      NOT',
-                '=': 'EQUAL'
-            }[op]
-        elif type1.lower() == 'real':
-            instr = {
-                '<': 'FINF',
-                '>': 'FSUP',
-                '<=': 'FINFEQ',
-                '>=': 'FSUPEQ',
-                '<>': 'EQUAL\n      NOT',
-                '=': 'EQUAL'
-            }[op]
+        if type1.lower() != 'char':
+            # Seleciona instrução de comparação
+            if type1.lower() == 'integer':
+                instr = {
+                    '<': 'INF',
+                    '>': 'SUP',
+                    '<=': 'INFEQ',
+                    '>=': 'SUPEQ',
+                    '<>': 'EQUAL\n      NOT',
+                    '=': 'EQUAL'
+                }[op]
+            elif type1.lower() == 'real':
+                instr = {
+                    '<': 'FINF',
+                    '>': 'FSUP',
+                    '<=': 'FINFEQ',
+                    '>=': 'FSUPEQ',
+                    '<>': 'EQUAL\n      NOT',
+                    '=': 'EQUAL'
+                }[op]
+            else:
+                raise TypeError(f"Tipo de dado inválido para comparação: {type1} {op} {type2}")
         else:
-            raise TypeError(f"Tipo de dado inválido para comparação: {type1} {op} {type2}")
+            if type2.lower() == 'char':
+                instr = {
+                    '<': 'INF',
+                    '>': 'SUP',
+                    '<=': 'INFEQ',
+                    '>=': 'SUPEQ',
+                    '<>': 'EQUAL\n      NOT',
+                    '=': 'EQUAL'
+                }[op]
+            else:
+                raise TypeError(f"O compilador não suporta comparar {type1} com {type2}.")
 
         code = code1 + code2 + [f"     {instr}\n"]
         p[0] = ('boolean', code)
@@ -885,30 +907,33 @@ def p_factor(p):                        ## carrega o valor para topo da stack
               | INTEGER
               | REAL
               | IDENTIFIER identifier_expression
+              | IDENTIFIER length_expression
+              | STRING
               | TRUE
               | FALSE'''
     
     global variaveis, index
-    if len(p) == 3 and p.slice[1].type == 'IDENTIFIER':
+    if len(p) == 3 and p.slice[1].type == 'IDENTIFIER' and p[1] != 'length':
         if p[2] is not None:
 
             tipo, (menor, maior, tamanho, struct_index, elements_type) = variaveis[p[1]]
 
-            if tipo != 'array':
-                raise TypeError(f'A variável {p[1]} deveria ser um array.')
-
+            if tipo != 'array' and tipo != 'string':
+                raise TypeError(f'A variável {p[1]} deveria ser um array ou uma string.')
 
 
             commands = []
             commands += [f'     PUSHST {struct_index}\n']
             commands += p[2][1][0]
 
-            p[0] = ('array', (commands, elements_type))
-
-
+            if tipo == 'string':
+                p[0] = ('char', commands + ['     LOADN\n'])
+            else:
+                commands += ['     PUSHI 1\n', '     SUB\n']
+                p[0] = ('array', (commands, elements_type))
 
         else: # não é array
-            if variaveis.get(p[1]) is not None:  ##TODO nao suporta varaiveis dentro de arrays
+            if variaveis.get(p[1]) is not None:
                 tipo, index_var = variaveis[p[1]]
                 if tipo == 'string':
                     p[0] = ('string', p[1])
@@ -919,9 +944,14 @@ def p_factor(p):                        ## carrega o valor para topo da stack
                 p[0] = ('boolean', ["     PUSHI 1\n"])
             elif p.slice[1].type == 'FALSE':
                 p[0] = ('boolean', ["     PUSHI 0\n"])
-
+    elif len(p) == 3 and p.slice[1].type == 'IDENTIFIER' and p[1] == 'length':
+        p[0] = p[2]
     
-
+    elif p.slice[1].type == 'STRING':
+        if len(p[1]) == 1: # só funciona para comparar elementos de uma string
+            p[0] = ('char', [f"      PUSHS \"{p[1]}\"\n     CHRCODE\n"])
+        else:
+            p[0] = ('string_pure', [f"      PUSHS \"{p[1]}\"\n"])
 
     elif len(p) == 4:
         p[0] = p[2]
@@ -959,6 +989,36 @@ def p_factor(p):                        ## carrega o valor para topo da stack
         elif p.slice[1].type == 'FALSE':
             p[0] = ('boolean', ["     PUSHI 0\n"])
 
+def p_length_expression(p):
+    '''length_expression : LPAREN IDENTIFIER RPAREN'''
+    
+    var_name = p[2]
+
+
+    if variaveis.get(var_name) is not None:
+        tipo, dados = variaveis[var_name]
+        
+        if tipo == 'string':
+            menor, maior, tamanho, struct_index, elements_type = dados
+            commands = [
+                f'     PUSHST {struct_index}\n',
+                '     PUSHI 0\n',
+                '     LOADN\n'
+            ]
+            p[0] = ('integer', commands)
+        elif tipo == 'array':
+            menor, maior, tamanho, struct_index, elements_type = dados
+            commands = [
+                f'     PUSHI {tamanho}\n'  # Tamanho fixo do array
+            ]
+            p[0] = ('integer', commands)
+        else:
+            raise TypeError(f'length() só funciona com strings ou arrays, mas {var_name} é {tipo}')
+    else:
+        raise NameError(f"Variável não declarada: {var_name}")
+
+
+
 def p_identifier_expression(p):
     '''
     identifier_expression : LBRACKET expression RBRACKET
@@ -966,13 +1026,13 @@ def p_identifier_expression(p):
     '''
     global variaveis, index
     if p[1] is not None:
-        if len(p) == 4 and p[2][0].lower() == 'integer': ##TODO arrays de chars            
+        if len(p) == 4 and p[2][0].lower() == 'integer':            
             tipo_indice, commands_indice = p[2]
             
             if tipo_indice.lower() != 'integer':
                 raise TypeError("Índice de array deve ser inteiro")
 
-            p[0] = ('array', (commands_indice + ["      PUSHI 1\n       SUB\n"], p[2][0].lower()))
+            p[0] = ('access', (commands_indice, p[2][0].lower()))
     else:
         p[0] = None
 
