@@ -72,7 +72,7 @@ closed_statement → IDENTIFIER identifier_assign_expression
 ### **Atribuições e Condições**
 ```
 identifier_assign_expression → ASSIGN assign_expression
-                             | LBRACKET expression RBRACKET ASSIGN assign_expression
+                             | LBRACKET simple_expression RBRACKET ASSIGN assign_expression
 
 for_condition → expression ASSIGN expression to_expression
 

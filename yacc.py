@@ -72,6 +72,13 @@ def p_vardecl(p):
             index += 1
 
             p[0] += [f"     ALLOC {tamanho}\n"]
+            for i in range(tamanho):
+                p[0] += [
+                    f"     PUSHST {struct_index - 1}\n",
+                    f"     PUSHI {i}\n",
+                    f"     PUSHI 0\n",
+                    "     STOREN\n"
+                ]
 
         elif p[3].lower() == 'string':
             menor, maior = 1, STRING_MAX_SIZE
@@ -380,7 +387,7 @@ def p_closed_statement(p):
 
 def p_identifier_assign_expression(p):
     '''identifier_assign_expression : ASSIGN assign_expression  
-                                    | LBRACKET expression RBRACKET ASSIGN assign_expression
+                                    | LBRACKET simple_expression RBRACKET ASSIGN assign_expression
     '''
     if p[1] == ":=":  
         if (p[2][0].lower() == 'string_pure'):            
@@ -401,6 +408,9 @@ def p_identifier_assign_expression(p):
             # ('array', (menor, maior, tamanho, struct_index))
 
             actual_type, command = p[5]
+            
+            if p[2][0].lower() != 'integer':
+                raise TypeError('O índice precisa de ser um valor inteiro')
 
             commands = []
             commands += p[2][1]

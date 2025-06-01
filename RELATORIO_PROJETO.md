@@ -247,7 +247,24 @@ Relativamente à secção de código, temos a produção **code** que começa po
 
 Temos ainda o dotless_code que, são blocos de código BEGIN-END que não têm o ponto final, por exemplo utilizados em statements de if ou for.
 
-Da mesma forma,
+Temos então a produção referente a expressions, que reconhece precisamente cada uma das expressões do código, recorrendo ao expressions_tail, que é uma lista de expressions, que são separadas por ponto e vírgulas.
+
+#### **code**
+```
+begin
+    writeln('Ola, Mundo!', 12.23);  
+    ReadLn(i);
+    writeln(i);
+end.
+```
+#### **dotless_code**
+```
+for i := 1 to 5 do
+    begin
+        readln(numeros[i]);
+        soma := soma + numeros[i];
+    end;
+```
 
 
 
@@ -277,7 +294,7 @@ Um programa vai ser composto por uma lista de declaracoes (statements). Inicialm
 ### **Atribuições e Condições**
 ```
 identifier_assign_expression → ASSIGN assign_expression
-                             | LBRACKET expression RBRACKET ASSIGN assign_expression
+                             | LBRACKET simple_expression RBRACKET ASSIGN assign_expression 
 
 for_condition → expression ASSIGN expression to_expression
 
@@ -289,6 +306,25 @@ code_or_statement → dotless_code
 
 if_condition → expression
 ```
+
+Nesta secção apresentámos a gramática para as atribuições de valores a variáveis, no caso a produção de **identifier_assign_expression**, que pode ter dois tipos:
+- **Atribuir um valor a uma variável**, que é a primeira produção de **identifier_assign_expression**, onde reconhece em primeiro lugar o símbolo de ASSIGN ':=', e de seguida a **assign_expression**, que é uma expressão que pode ser tanto um valor único, como um conjunto de operações relacionais, aritméticas ou lógicas, dependendo do tipo da varriável que estamos a dar assign. É importante mencionar que fizémos uma verificação de tipos na atribuição, ou seja, verificar se as duas expressões são do mesmo tipo;
+
+- **Atribuir um valor a um índice de um array**, que reconhece o índice do array, através de do reconhecimento do LBRACKET '[', e de seguida a expressão relativa a ir buscar o seu índice, que só pode ser simple_expression, no entanto, no YACC é necessário verificar se o valor proveniente dessa expression é um valor inteiro, caso não for, dá erro de tipos. Por fim, reconhece RBRACKET ']' e ASSIGN ':=' e a expressão que pretende associar a essa variável.
+
+#### **Atribuir um valor a uma variável**
+```
+:= 0;
+```
+
+#### **Atribuir um valor a um índice de um array**
+```
+[1] := 2
+```
+
+Temos ainda a gramática referente às condições das operações for, **for_condition** e **to_expression**, onde a primeira define a condição do ciclo for, por exemplo, percorrer enquanto o valor de i é menor que 10 e, a segunda, **to_expression**, que define se o for é do tipo TO ou DOWNTO.
+
+Por fim, temos o **code_or_statement**, que define o bloco de "código" do if, for ou while, ou seja, as operações que serão efetuadas dentro dos ciclos ou nas operações de if.
 
 ### **I/O Statements**
 ```
@@ -302,9 +338,9 @@ string_statement → assign_expression
 assign_expression → expression
 ```
 
-Estes statements correspondem aqueles destinados a operacoes input/output. Aqui temos os write_statement que serve para refletir funcoes de escrita (quer write quer writeln) nela capturamos um "string_statement" que pode ser uma expressao, ou seja, um valor qualquer valido desde inteiros a strings, e pode conter mais que uma expressao, nesse caso as mesmas sao imprimidas de forma concatenada. 
+Nos statemets de input/output temos simbolos nao terminais para identificar acoes de escrita "write_statement" e leitura "readln_statement", ambas recebem um string_statement que pode ser uma so "assign_expression", ou uma lista com varias separadas por virgulas; nesse caso serao concatenados os resultados (no caso de escrita). Uma assign_expression  MUDAR AQUI PARA EXPRESSION 
 
-O "readln_statement" e similar ao write pelo que recebe um "string_statement", desta vez o codigo maquina gerado sera correspondente ao READ da maquina virtual e, dessa forma, sera sempre um formato string inicialmente; para isso , de modo a refletir o codigo em pascal, funcoes de read que tenham que pretendam ler valores numerico inteiro ou booleano serao tranformados em inteiros (ATOI) e reais em valores reais correspondentes (ATOF).
+A expression pode tomar varios valores e, no caso de nao serem uma string, sao transoformados numa, no caso de um inteiro usamos o "STRI", de um valor real o "STRF" e , no caso de um valor booleano, escrevemos logo o output "WRITEI".
 
 ### **Expressões Booleanas e Aritméticas**
 ```
@@ -326,132 +362,12 @@ expression_tail → LT simple_expression
                 | empty
 ```
 
-### **Expressões Aritméticas**
-```
-simple_expression → term simple_expression_tail
+Esta parte da gramática define como as expressões lógicas e aritméticas podem ser combinadas, respeitando a precedência dos operadores em Pascal.
 
-simple_expression_tail → PLUS term simple_expression_tail
-                       | MINUS term simple_expression_tail
-                       | empty
+A definição destas produções foi cuidadosamente desenhada para garantir que a precedência e associatividade dos operadores em Pascal é corretamente respeitada, evitando ambiguidades e conflitos de parsing. 
 
-term → factor term_tail
+Ao separar as expressões em diferentes níveis (`expression`, `and_expression`, `relation_expression`, etc.), conseguimos refletir a ordem natural de avaliação dos operadores: primeiro as operações relacionais, depois os operadores lógicos `AND` e, por fim, o `OR`. Esta abordagem torna a gramática mais clara, permitindo ao parser distinguir facilmente entre expressões aritméticas, relacionais e booleanas, assegurando que cada operação é efetuada conforme os seus requisitos de precedência.
 
-term_tail → TIMES factor term_tail
-          | DIVIDE factor term_tail
-          | MOD factor term_tail
-          | REAL_DIVIDE factor term_tail
-          | empty
-```
-
-Para implementar expressoes aritmetricas tivemos que ter atencao extra a precedencia de operacoes, assim uma expressao aritmetrica, podendo tomar qualquer valor desde um simples inteiro a uma expressao enorme, trata-se de um termo e uma "simple_expression_tail". A cauda pode ser uma operacao de mais(PLUS) ou de menos(MINUS), assim estas terao menos prioridade que aquelas que sao descritas na expecificacao do proprio termo; na "term_tail" podemos ter operacoes de multiplicacao, divisao e resto; estas terao prioridade respeitando as regras esperadas de operacoes aritmetricas.
-
-### **Fatores**
-```
-factor → PLUS factor
-       | MINUS factor
-       | LPAREN expression RPAREN
-       | INTEGER
-       | REAL
-       | IDENTIFIER identifier_expression
-       | IDENTIFIER length_expression
-       | TRUE
-       | STRING
-       | FALSE
-```
-
-### **Acesso a Arrays e funçao length**
-```
-length_expression → LPAREN IDENTIFIER RPAREN
-
-identifier_expression → LBRACKET expression RBRACKET
-                      | empty
-```
-
-
-
-### **Regra Vazia**
-```
-empty → ε
-```
-
-## **Características Especiais da Gramática**
-
-### **1. Solução para Dangling Else**
-- **open_statement**: Statements incompletos que podem causar ambiguidade
-- **closed_statement**: Statements completos e bem definidos
-
-### **2. Precedência de Operadores (da maior para menor)**
-1. **Unário**: `+`, `-`, `NOT`
-2. **Multiplicativo**: `*`, `div`, `mod`, `/`
-3. **Aditivo**: `+`, `-`
-4. **Relacional**: `=`, `<>`, `<`, `>`, `<=`, `>=`
-5. **Lógico AND**: `AND`
-6. **Lógico OR**: `OR`
-
-### **3. Tipos Suportados**
-- **Primitivos**: `integer`, `real`, `boolean`, `string`
-- **Compostos**: `array[min..max] of integer`
-- **Literais**: `números inteiros`, `reais`, `strings`, `true`, `false`
-               | IF if_condition THEN code_or_statement ELSE open_statement
-               | WHILE if_condition DO open_statement
-               | FOR for_condition DO open_statement
-
-closed_statement → IDENTIFIER identifier_assign_expression
-                 | WRITELN write_statement
-                 | WRITE write_statement
-                 | READLN readln_statement
-                 | IF if_condition THEN code_or_statement ELSE code_or_statement
-                 | FOR for_condition DO code_or_statement
-                 | WHILE if_condition DO code_or_statement
-```
-
-### **Atribuições e Condições**
-```
-identifier_assign_expression → ASSIGN assign_expression
-                             | LBRACKET expression RBRACKET ASSIGN assign_expression
-
-for_condition → expression ASSIGN expression to_expression
-
-to_expression → TO expression
-              | DOWNTO expression
-
-code_or_statement → dotless_code
-                  | closed_statement
-
-if_condition → expression
-```
-
-### **I/O Statements**
-```
-write_statement → LPAREN string_statement RPAREN
-
-readln_statement → LPAREN string_statement RPAREN
-
-string_statement → assign_expression
-                 | assign_expression COMMA string_statement
-
-assign_expression → expression
-```
-
-### **Expressões Booleanas e Aritméticas**
-```
-expression → expression OR and_expression
-           | and_expression
-
-and_expression → and_expression AND relation_expression
-               | relation_expression
-
-relation_expression → simple_expression expression_tail
-                    | NOT simple_expression expression_tail
-
-expression_tail → LT simple_expression
-                | GT simple_expression
-                | LE simple_expression
-                | GE simple_expression
-                | NE simple_expression
-                | EQUAL simple_expression
-                | empty
-```
 
 ### **Expressões Aritméticas**
 ```
@@ -484,128 +400,13 @@ factor → PLUS factor
        | FALSE
 ```
 
-### **Acesso a Arrays e funçao length**
-```
-length_expression → LPAREN IDENTIFIER RPAREN
+A produção `factor` define os elementos mais básicos que podem aparecer numa expressão aritmética ou booleana. Esta produção permite representar:
 
-identifier_expression → LBRACKET expression RBRACKET
-                      | empty
-```
+- **Operadores unários**: O uso de `PLUS` e `MINUS` antes de um fator permite lidar com sinais positivos e negativos, respeitando a precedência dos operadores unários;
+- **Parêntesis**: O uso de `LPAREN expression RPAREN` permite alterar a ordem de avaliação das operações, garantindo que expressões entre parêntesis são avaliadas em primeiro;
+- **Literais**: Permite o uso direto de valores inteiros, reais, booleanos e strings nas expressões;
+- **Identificadores**: Permite o uso de variáveis simples, acesso a arrays ou strings por índice, e também o uso da função `length` para obter o tamanho de arrays ou strings.
 
-### **Regra Vazia**
-```
-empty → ε
-```
-
-## **Características Especiais da Gramática**
-
-### **1. Solução para Dangling Else**
-- **open_statement**: Statements incompletos que podem causar ambiguidade
-- **closed_statement**: Statements completos e bem definidos
-
-### **2. Precedência de Operadores (da maior para menor)**
-1. **Unário**: `+`, `-`, `NOT`
-2. **Multiplicativo**: `*`, `div`, `mod`, `/`
-3. **Aditivo**: `+`, `-`
-4. **Relacional**: `=`, `<>`, `<`, `>`, `<=`, `>=`
-5. **Lógico AND**: `AND`
-6. **Lógico OR**: `OR`
-
-### **3. Tipos Suportados**
-- **Primitivos**: `integer`, `real`, `boolean`, `string`
-- **Compostos**: `array[min..max] of integer`
-- **Literais**: `números inteiros`, `reais`, `strings`, `true`, `false`
-               | IF if_condition THEN code_or_statement ELSE open_statement
-               | WHILE if_condition DO open_statement
-               | FOR for_condition DO open_statement
-
-closed_statement → IDENTIFIER identifier_assign_expression
-                 | WRITELN write_statement
-                 | WRITE write_statement
-                 | READLN readln_statement
-                 | IF if_condition THEN code_or_statement ELSE code_or_statement
-                 | FOR for_condition DO code_or_statement
-                 | WHILE if_condition DO code_or_statement
-```
-
-### **Atribuições e Condições**
-```
-identifier_assign_expression → ASSIGN assign_expression
-                             | LBRACKET expression RBRACKET ASSIGN assign_expression
-
-for_condition → expression ASSIGN expression to_expression
-
-to_expression → TO expression
-              | DOWNTO expression
-
-code_or_statement → dotless_code
-                  | closed_statement
-
-if_condition → expression
-```
-
-### **I/O Statements**
-```
-write_statement → LPAREN string_statement RPAREN
-
-readln_statement → LPAREN string_statement RPAREN
-
-string_statement → assign_expression
-                 | assign_expression COMMA string_statement
-
-assign_expression → expression
-```
-
-### **Expressões Booleanas e Aritméticas**
-```
-expression → expression OR and_expression
-           | and_expression
-
-and_expression → and_expression AND relation_expression
-               | relation_expression
-
-relation_expression → simple_expression expression_tail
-                    | NOT simple_expression expression_tail
-
-expression_tail → LT simple_expression
-                | GT simple_expression
-                | LE simple_expression
-                | GE simple_expression
-                | NE simple_expression
-                | EQUAL simple_expression
-                | empty
-```
-
-### **Expressões Aritméticas**
-```
-simple_expression → term simple_expression_tail
-
-simple_expression_tail → PLUS term simple_expression_tail
-                       | MINUS term simple_expression_tail
-                       | empty
-
-term → factor term_tail
-
-term_tail → TIMES factor term_tail
-          | DIVIDE factor term_tail
-          | MOD factor term_tail
-          | REAL_DIVIDE factor term_tail
-          | empty
-```
-
-### **Fatores**
-```
-factor → PLUS factor
-       | MINUS factor
-       | LPAREN expression RPAREN
-       | INTEGER
-       | REAL
-       | IDENTIFIER identifier_expression
-       | IDENTIFIER length_expression
-       | TRUE
-       | STRING
-       | FALSE
-```
 
 ### **Acesso a Arrays e funçao length**
 ```
@@ -626,66 +427,45 @@ empty → ε
 - **open_statement**: Statements incompletos que podem causar ambiguidade
 - **closed_statement**: Statements completos e bem definidos
 
-### **2. Precedência de Operadores (da maior para menor)**
-1. **Unário**: `+`, `-`, `NOT`
-2. **Multiplicativo**: `*`, `div`, `mod`, `/`
-3. **Aditivo**: `+`, `-`
-4. **Relacional**: `=`, `<>`, `<`, `>`, `<=`, `>=`
-5. **Lógico AND**: `AND`
-6. **Lógico OR**: `OR`
-
-### **3. Tipos Suportados**
-- **Primitivos**: `integer`, `real`, `boolean`, `string`
-- **Compostos**: `array[min..max] of integer`
-- **Literais**: `números inteiros`, `reais`, `strings`, `true`, `false`
-
-### **4. Estruturas de Controle**
-- **Condicionais**: `if-then`, `if-then-else`
-- **Loops**: `while-do`, `for-to-do`, `for-downto-do`
-- **I/O**: `write()`, `writeln()`, `readln()`
-
-### **5. Operações com Arrays e Strings**
-- **Acesso**: `array[index]`, `string[index]`
-- **Função length**: `length(variable)`
-- **Atribuição**: `variable := value`, `array[index] := value`
-
-Esta gramática implementa uma versão simplificada do Pascal.
 
 
-# Capítulo 4
-## Implementação (Analise Semantica)
 
-### 4.1 Alternativas Tecnológicas e Decisões
+# Implementação 
 
-**Tecnologias Utilizadas:**
+Na presente secção iremos apresentar algumas decisões e implementações de funcionalidades que não estavam evidentes nos programas de testes fornecidos pela equipa docente.
 
-1. **Python 3.x**
-   - Linguagem principal de implementação
-   - Facilidade de prototipagem e debugging
-   - Excelente suporte para processamento de texto
+## Variáveis globais no YACC
 
-2. **PLY (Python Lex-Yacc)**
-   - Framework para criação de lexers e parsers
-   - Compatível com lex/yacc tradicionais
-   - Geração automática de tabelas de parsing
-
-3. **Arquitetura Assembly Customizada**
-   - Conjunto de instruções simplificado
-   - Foco em estruturas de controle
-   - Compatível com máquina virtual educacional
-
-**Decisões de Design:**
-
-| Aspecto | Alternativa Escolhida | Justificativa |
-|---------|----------------------|---------------|
-| Parser Generator | PLY vs ANTLR | PLY integra melhor com Python |
-| Estratégia Conflicts | Precedence vs Grammar Rewrite | Grammar rewrite mais elegante |
-| Code Generation | During parsing vs Separate phase | Durante parsing é mais eficiente |
-| Error Recovery | Panic mode vs Phrase level | Panic mode mais simples |
+De forma a facilitar o controlo das variáveis e de outros parâmetros necessários à compilação de programas Pascal, utilizámos as seguintes variáveis globais no nosso analisador sintático:
+- **variaveis**: Dicionário que guarda as variáveis do programa, onde a chave é o nome da variável e o valor que é um tuplo onde o primeiro elemento indica o tipo de variável e o segundo elemento indica o índice dessa variável no **Global Pointer** da VM;
+- **label_index**: De forma às labels da VM terem nomes únicos para não haver conflitos, recorremos a esta variável que é utilizada para dar diferentes nomes às labels (LABEL0, LABEL1, etc..);
+- **index**: Variável que indica o número de variáveis que foram guardadas antes do **START** na VM;
+- **struct_index**: Variável que indica o número de estruturas guardadas na Struct Heap;
+- **numero_ciclos_if**: Variável que controla o número de labels referentes aos IF's, de forma às labels serem valores únicos;
+- **numero_ciclos_for**: Variável que controla o número de labels referentes aos FOR's, de forma às labels serem valores únicos;
+- **numero_ciclos_while**: Variável que controla o número de labels referentes aos WHILE's, de forma às labels serem valores únicos;
+- **index_variavel_ciclo_for**:
+- **tipo_ciclo_for**: 
 
 
-# Capítulo 5
-## Utilizaçao
+
+## Arrays e strings
+De forma a guardámos as strings e arrays no nosso programa, utilizámos uma arquitetura bastante similar entre ambas onde, o que difere é o tamanho que cada uma ocupa. Ambos são guardados na struct heap e, no caso das strings, é guardado o seu valor de ASCII.
+
+Para um array, se este for definido da seguinte forma: ```v: array[1..5] of integer```, apenas serão alocados 5 elementos do array ao contrário da string que, como é definida da seguinte forma: ```s: string```, são alocados 256 posições, valor predefinido no YACC através da variável **STRING_MAX_SIZE**.
+
+É importante também mencionar que, a forma como é calculado o tamanho de uma string é acedendo ao índice 0 da sua estrutura, uma vez que esse valor representa precisamente o tamanho da string guardada na struct. Por outro lado, o tamanho do array é sempre o mesmo quer esteja preenchido ou não (definição do Pascal) e, por isso, para calcular o tamanho do array basta pesquisar pela variável no dicionário guardado no YACC e, pegar no valor do tamanho do array. Opcionalmente podias controlar da mesma forma que as strings, no entanto, não achámos necessário uma vez que um array terá sempre o mesmo tamanho.
+
+Quanto aos arrays, é importante mencionar que iniciámos todos os índices com o valor de 0. Esta decisão foi apenas uma decisão de arquitetura uma vez que se tentarmos aceder a um índice de um certo array que não foi inicializado, este dará um valor sem significado e não dá erro.
+
+## Write de strings
+Uma vez que guardámos as nossas strings na **struct heap**, para conseguirmos escrevê-la no ecrã decidimos recorrer à utilização de labels onde, será feito uma espécie de ciclo while enquanto não forem percorridos todos os elementos. Ou seja, iremos buscar o valor do tamanho da string (índice 0 da struct heap) e de seguida percorrer cada um dos índices válidos, utilizando o comando **WRITECHR** da VM para escrever a letra correspondente ao símbolo ASCII.
+
+## Controlo de erros
+De forma a evitar erros desnecessários de compilação, fazemos algum controlo de erros nomeadamente no assignment de um valor a uma certa variável, ou seja, verificámos se os tipos entre o valor a associar e o valor da variável são iguais, caso não sejam, irá ser lançado um TypeError pelo YACC.
+
+
+# Utilizaçao
 
 O programa pode ser executado sem argumentos e, assim, traduz os programas na pasta "programas_pascal" exceto o programa numero 7, nesse e necessaria a traducao de functions e nao implementamos essa funcionalidade como mencionado previamente. 
 
