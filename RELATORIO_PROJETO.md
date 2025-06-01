@@ -215,7 +215,7 @@ var
 ```
 icilpxe amrof edopen_statementsnekot son .ocode_or_statementnaeloob
 
-Um programa vai ser composto por uma lista devdeclaracoes (statements). Inicialmente nao implementamos logica de statements open ou closed mas , mais tarde, problemas de shift/reduce causados por problemas de dangling else  r
+
 
 
 
@@ -269,6 +269,10 @@ closed_statement → IDENTIFIER identifier_assign_expression
                  | FOR for_condition DO code_or_statement
                  | WHILE if_condition DO code_or_statement
 ```
+Um programa vai ser composto por uma lista de declaracoes (statements). Inicialmente nao implementamos logica de statements open ou closed mas , mais tarde, problemas de shift/reduce causados pelo paradigma do dangling else (ambiguidade na atribuicao do else ao if correspondente), levaram-nos a implementar essa distincao. Para declaracoes abertas temos que garantir que existe pelo menos 1 declaracao if sem um else associado, desta forma nao pode ser uma declaracao simples como uma atribuicao, um write/writeln ou um readln, esses garantem que nao existe um ciclo if aberto e sao sempre consideradas declaracoes fechadas. Declaracoes abertas podem, assim, ser declaracoes if , com ou sem else, ou ciclos while/for, uma vez que todos estes tem a posibilidade de ter codigo que contenha multiplas declaracoes ou uma so declaracao que se trate de um if sem else associado.
+
+
+
 
 ### **Atribuições e Condições**
 ```
@@ -297,6 +301,10 @@ string_statement → assign_expression
 
 assign_expression → expression
 ```
+
+Estes statements correspondem aqueles destinados a operacoes input/output. Aqui temos os write_statement que serve para refletir funcoes de escrita (quer write quer writeln) nela capturamos um "string_statement" que pode ser uma expressao, ou seja, um valor qualquer valido desde inteiros a strings, e pode conter mais que uma expressao, nesse caso as mesmas sao imprimidas de forma concatenada. 
+
+O "readln_statement" e similar ao write pelo que recebe um "string_statement", desta vez o codigo maquina gerado sera correspondente ao READ da maquina virtual e, dessa forma, sera sempre um formato string inicialmente; para isso , de modo a refletir o codigo em pascal, funcoes de read que tenham que pretendam ler valores numerico inteiro ou booleano serao tranformados em inteiros (ATOI) e reais em valores reais correspondentes (ATOF).
 
 ### **Expressões Booleanas e Aritméticas**
 ```
@@ -335,6 +343,8 @@ term_tail → TIMES factor term_tail
           | empty
 ```
 
+Para implementar expressoes aritmetricas tivemos que ter atencao extra a precedencia de operacoes, assim uma expressao aritmetrica, podendo tomar qualquer valor desde um simples inteiro a uma expressao enorme, trata-se de um termo e uma "simple_expression_tail". A cauda pode ser uma operacao de mais(PLUS) ou de menos(MINUS), assim estas terao menos prioridade que aquelas que sao descritas na expecificacao do proprio termo; na "term_tail" podemos ter operacoes de multiplicacao, divisao e resto; estas terao prioridade respeitando as regras esperadas de operacoes aritmetricas.
+
 ### **Fatores**
 ```
 factor → PLUS factor
@@ -356,6 +366,8 @@ length_expression → LPAREN IDENTIFIER RPAREN
 identifier_expression → LBRACKET expression RBRACKET
                       | empty
 ```
+
+
 
 ### **Regra Vazia**
 ```
