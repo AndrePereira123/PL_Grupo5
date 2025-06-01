@@ -21,7 +21,7 @@
 
 
 
-Este relatório tem como proposto a exposição do processo de desenvolvimento de um compilador para uma versão simplificada da linguagem Pascal, focado na tradução do código escrito em pascal para código "maquina" que seja funcional na virtual machine EWVM (https://ewvm.epl.di.uminho.pt). Os resultados demonstram a eliminação completa dos conflitos shift/reduce e reduce/reduce, garantindo uma análise sintática determinística e geração correta de código para estruturas condicionais e iterativas.
+Este relatório tem como propósito a exposição do processo de desenvolvimento de um compilador para uma versão simplificada da linguagem Pascal, focado na tradução do código escrito em pascal para código "maquina" que seja funcional na virtual machine EWVM (https://ewvm.epl.di.uminho.pt). Os resultados demonstram a eliminação completa dos conflitos shift/reduce, reduce/reduce,... , garantindo uma análise sintática determinística e geração correta de código para estruturas condicionais e iterativas.
 
 
 
@@ -41,7 +41,7 @@ Para a análise léxica e sintática, recorremos ao PLY, que foi a biblioteca ut
 
 
 
-Referente aos testes fornecidos, conseguimos implementar todas as funcionalidades presentes neles menos as funcionalidades de funções e procedures.
+Referente aos testes fornecidos, conseguimos implementar todas as funcionalidades presentes neles exceto as funcionalidades de funções e procedures.
 
 
 
@@ -59,9 +59,7 @@ Definida no ficheiro "lex.py" encontra-se o analisador léxico que desenvolvemos
 
 
 
-É importante mencionar que os tokens tantos e tratam de palavras reservadas (p.ex. PROGRAM) como símbolos variáveis, como por exemplo números, nome das variáveis etc..
-
-
+É importante mencionar que os tokens abrangem tanto símbolos terminais fixos (palavras reservadas como PROGRAM, IF, WHILE) como símbolos terminais variáveis (literais numéricos, identificadores, strings, etc.).
 
 Segue-se uma descrição dos tokens: 
 
@@ -174,19 +172,9 @@ O analisador léxico reconhece os seguintes tokens organizados por categoria fun
 
 
 
-O processo de implementação da gramática foi gradual e irregular, começou com uma gramática simples para o primeiro exemplo de programa "hello_world" e, rapidamente, as falhas iam surgindo quantos mais testes fossem realizados; problemas de shift/reduce com declarações if foram um dos maiores problemas.
+O processo de implementação da gramática foi gradual e irregular, começou com uma gramática simples para o primeiro exemplo de programa "hello_world" e, rapidamente, as falhas surgiram à medida que mais testes foram realizados; problemas de shift/reduce com declarações if foram um dos maiores problemas.
 
-
-
-É importante mencionar que, por defeito, o símbolos terminais são expressos em em maiúsculas e os símbolos não terminais em minúsculas.
-
-
-
-A forma como definimos as strings foi guardando uma struct na struct heap, onde o índice 0 dessa struct corresponde ao tamanho da string e, os restantes a partir do índice 1, corresponde aos valores de ASCII de cada letra da string. O tamanho máximo da string foi definido com 256 mas, pode ser alterado no ficheiro **yacc.py**, mudando a variável global **STRING_MAX_SIZE**.
-
-
-
-
+É importante mencionar que, por defeito, os símbolos terminais são expressos em maiúsculas e os símbolos não terminais em minúsculas.
 
 A gramática final tomou esta forma: ("gramatica.md")
 
@@ -275,35 +263,20 @@ arraytypes → INTEGER
 
 
 
-Para refletir os tipos básicos em pascal criamos um "TYPE_INTEGER","TYPE_REAL","BOOLEAN" e "TYPE_STRING". O prefixo "TYPE_" existe para distinguir a declaracao do tipo inteiro ou seja "integer" e um valor inteiro "1,2,3,...", o mesmo aplica-se para reais e strings. Os valores booleanos destacam-se pelo facto de não terem um equivalente na máquina virtual, pelo que soa tratados como inteiros que só podem tomar valor 1 e 0 e sem necessidade de distinguir tipo booleano de um val
+Para refletir os tipos básicos em pascal criamos um "TYPE_INTEGER","TYPE_REAL","BOOLEAN" e "TYPE_STRING". O prefixo "TYPE_" existe para distinguir a declaracao do tipo inteiro ou seja "integer" e um valor inteiro "1,2,3,...", o mesmo aplica-se para reais e strings. Os valores booleanos destacam-se pelo facto de não terem um equivalente na máquina virtual, pelo que decidimos trata-los como inteiros que só podem tomar valor 1 ou 0.
 
-ekot sem pascal :  ioaveins deste genero,  () pascala:
+Apenas implementamos arrays de inteiros "ARRAY ..." onde o arraytypes permite a definição de um array com 1 só elemento ou mais de 1 elemento.
 
-
+Em conjunto a gramática para variáveis e a gramática para tipos de dados permitem interpretar declarações de variáveis em Pascal:
 
 ```
-
 var
     numeros : array[1..5] of integer;
     i, soma: integer;
     b : boolean
     r : real
-    s : stringt
+    s : string
 ```
-
-icilpxe amrof edopen_statementsnekot son .ocode_or_statementnaeloob
-
-
-arrays arrays etc. etc.mn
-
-
-
-Em conjuntos as gramáticas para variáveis e tipos de dados permitem interpretar declarações de variáveis na máquina virtual.
-
-nitsid assed edadissecen evuoho oan missa ,.ritsixe oan oticilpxe onaelollob opit o ,lautriv aniuqam an euq ed otca
-
-
-arrays arrays etc. etc.mn
 
 
 
@@ -325,13 +298,10 @@ expressions_tail → SEMICOLON expressions
 
 
 
-Relativamente à secção de código, temos a produção **code** que começa por ler o símbolo terminal **BEGIN**, de seguida reconhece expressions, que é todo o conjunto de expressões possíveis pelo no compilador, como, por exemplo ciclos for, if's, atribuição de valores a variáveis.
+Relativamente à secção de código, temos a produção **code** que começa por ler o símbolo terminal **BEGIN**, de seguida reconhece expressions, que é todo o conjunto de expressões possíveis no compilador, como, por exemplo ciclos for, if's, atribuição de valores a variáveis,etc..
 
 
-
-Temos ainda o dotless_code que, são blocos de código BEGIN-END que não têm o ponto final, por exemplo, utilizados em statements de if ou for.
-
-
+Temos ainda o dotless_code que são blocos de código BEGIN-END que não têm o ponto final, por exemplo, utilizados em statements de if ou for.
 
 Temos então a produção referente a expressions, que reconhece precisamente cada uma das expressões do código, recorrendo ao expressions_tail, que é uma lista de expressions, separadas por ponto e vírgulas.
 
@@ -383,7 +353,11 @@ closed_statement → IDENTIFIER identifier_assign_expression
                  | WHILE if_condition DO code_or_statement
 ```
 
-Um programa vai ser composto por uma lista de declarações (statements). Inicialmente não implementamos lógica de statements open ou closed, mas , mais tarde, problemas de shift/reduce causados pelo paradigma do dangling else (ambiguidade na atribuição do else ao if correspondente), levaram-nos a implementar essa distinção. Para declarações abertas temos que garantir que existe pelo menos 1 declaração if sem um else associado, desta forma não pode ser uma declaração simples como uma atribuição, um write/writeln ou um readln, esses garantem que não existe um ciclo if aberto e são sempre consideradas declarações fechadas. Declarações abertas podem, assim, ser declarações if , com ou sem else, ou ciclos while/for, uma vez que todos estes tem a possibilidade de ter código que contenha múltiplas declarações ou uma só declaração que se trate de um if sem else associado.
+Um programa vai ser composto por uma lista de declarações (statements). Inicialmente não implementamos lógica de **statements** open ou closed, mas , mais tarde, problemas de shift/reduce causados pelo paradigma do **dangling else** (ambiguidade na atribuição do else ao if correspondente), levaram-nos a implementar essa distinção. 
+
+Para declarações abertas temos que garantir que existe pelo menos 1 declaração if sem um else associado, desta forma não pode ser uma declaração simples como uma atribuição, um write/writeln ou um readln, esses garantem que não existe um ciclo if aberto, logo, são consideradas declarações fechadas.
+
+ Declarações abertas podem, assim, ser declarações if , com ou sem else, ou ciclos while/for, uma vez que todos estes tem a possibilidade de ter código que contenha múltiplas declarações ou uma só declaração que se trate de um if sem else associado.
 
 
 
@@ -420,6 +394,8 @@ Nesta secção apresentámos a gramática para as atribuições de valores a var
 
 ```
 := 0;
+:= 10.4;
+:= 'valor';
 ```
 
 
@@ -454,11 +430,10 @@ string_statement → expression
 
 
 
-Nos statemets de input/output temos símbolos não terminais para identificar ações de escrita "write_statement" e leitura "readln_statement", ambas recebem um string_statement que pode ser uma só "expression", ou uma lista com varias separadas por virgulas; nesse caso serão concatenados os resultados (no caso de escrita). Uma expression  MUDAR AQUI PARA EXPRESSION 
+Nos statemets de **input/output** temos símbolos não terminais para identificar ações de escrita "write_statement" e leitura "readln_statement", ambas recebem um string_statement que pode ser uma só "expression", ou uma lista com varias separadas por virgulas; no caso de escrita serão concatenados os resultados e no caso de leitura lê o input 1 a 1 na ordem recebida. 
 
 
-
-A expression pode tomar vários valores e, no caso de nao serem uma string, são transformados numa, no caso de um inteiro usamos o "STRI", de um valor real o "STRF" e , no caso de um valor booleano, escrevemos logo o output "WRITEI".
+A expression pode tomar vários valores e, no caso de não serem uma string, são transformados numa, no caso de um inteiro usamos o "STRI",no de um valor real o "STRF" e, no caso de um valor booleano, escrevemos logo o output "WRITEI".
 
 
 
@@ -485,7 +460,7 @@ expression_tail → LT simple_expression
 
 
 
-Esta parte da gramática define como as expressões lógicas e aritméticas podem ser combinadas, respeitando a precedência dos operadores em Pascal.
+Esta parte da gramática define como as expressões lógicas e aritméticas podem ser combinadas, **respeitando** a **precedência** dos operadores em Pascal.
 
 
 
@@ -514,7 +489,9 @@ term_tail → TIMES factor term_tail
           | empty
 ```
 
+Para implementar gramática relativa a **expressões aritméticas** tivemos que ter atenção extra à precedência de operações; uma expressão aritmética, podendo tomar qualquer valor desde um simples inteiro a uma expressão enorme, trata-se de um termo e uma "simple_expression_tail". 
 
+A cauda pode ser uma operação de mais(PLUS) ou de menos(MINUS), assim estas terão menor prioridade que aquelas que são descritas na especificação do termo (term); na "term_tail" podemos ter operações de multiplicação, divisão e resto; estas terão, assim, prioridade respeitando as regras esperadas de operações aritméticas.
 
 ### **Fatores**
 
@@ -558,29 +535,15 @@ identifier_expression → LBRACKET expression RBRACKET
                       | empty
 ```
 
+A "length_expression" permite reconhecer a varíavel a ser utilizada como input na função de length.
 
+A "identifier_expression" serve para reconhecer o índice de um array, no caso, o símbolo não terminal "expression" (verifica se é um valor inteiro).
 
 ### **Regra Vazia**
 
 ```
 empty → ε
 ```
-
-
-
-## **Características Especiais da Gramática**
-
-
-
-### **1. Solução para Dangling Else**
-- **open_statement**: Statements incompletos que podem causar ambiguidade
-
-- **closed_statement**: Statements completos e bem definidos
-
-
-
-
-
 
 
 
@@ -597,11 +560,11 @@ Na presente secção iremos apresentar algumas decisões e implementações de f
 
 
 
-De forma a facilitar o controlo das variáveis e de outros parâmetros necessários à compilação de programas Pascal, utilizámos as seguintes variáveis globais no nosso analisador sintático:
+De forma a facilitar o controlo das variáveis e de outros parâmetros necessários à compilação de programas Pascal e escrita de código na VM, utilizámos as seguintes variáveis globais no nosso analisador sintático:
 
-- **variaveis**: Dicionário que guarda as variáveis do programa, onde a chave é o nome da variável e o valor que é um tuplo onde o primeiro elemento indica o tipo de variável e o segundo elemento indica o índice dessa variável no **Global Pointer** da VM;
+- **variaveis**: Dicionário que guarda as variáveis do programa, onde a chave é o nome da variável e o valor é um tuplo onde o primeiro elemento indica o tipo de variável e o segundo elemento indica o índice dessa variável no **Global Pointer** da VM;
 
-- **label_index**: De forma às labels da VM terem nomes únicos para não haver conflitos, recorremos a esta variável que é utilizada para dar diferentes nomes às labels (LABEL0, LABEL1, etc..);
+- **label_index**: De forma às labels da VM terem nomes únicos para não haver conflitos, recorremos a esta variável que é utilizada para dar diferentes nomes às labels (**LABEL0**, **LABEL1**, etc..);
 
 - **index**: Variável que indica o número de variáveis que foram guardadas antes do **START** na VM;
 
@@ -613,9 +576,9 @@ De forma a facilitar o controlo das variáveis e de outros parâmetros necessár
 
 - **numero_ciclos_while**: Variável que controla o número de labels referentes aos WHILE's, de forma às labels serem valores únicos;
 
-- **index_variavel_ciclo_for**: Este dicionário guarda, para cada ciclo for, a "distancia" da variável usada para o ciclo for na stack; ou seja, permite dar "LOAD" da variável ou, em conjunto com o index, determinar onde usar "STOREG" para guardar a variável.
+- **index_variavel_ciclo_for**: Este dicionário guarda, para cada ciclo for, a "distancia" da variável usada para o ciclo for na stack; ou seja, permite dar "**LOAD**" da variável ou, em conjunto com o index, determinar com que valor usar o comando "**STOREG**" de forma a guardar a variável na posição correta da stack.
 
-- **tipo_ciclo_for**: Como o nome diz este dicionário regista o tipo de cada ciclo for, ou seja, se representa um "down to" ou "to" no código pascal original; assim, a cada iteração, podemos determinar se subtraímos ou somamos 1 valor a variável de ciclo.
+- **tipo_ciclo_for**: Como o nome diz este dicionário regista o tipo de cada ciclo for, ou seja, se representa um "down to" ou "to" no código pascal original; assim, a cada iteração, podemos determinar se subtraímos ou somamos 1 valor à variável de ciclo.
 
 
 
@@ -637,7 +600,7 @@ Para um array, se este for definido da seguinte forma: ```v: array[1..5] of inte
 
 
 
-Quanto aos arrays, é importante mencionar que iniciámos todos os índices com o valor de 0. Esta decisão foi apenas uma decisão de arquitetura uma vez que se tentarmos aceder a um índice de um certo array que não foi inicializado, este dará um valor sem significado e não dá erro.
+Quanto aos arrays, é importante mencionar que iniciámos todos os índices com o valor de 0. Esta decisão foi apenas uma decisão de arquitetura uma vez que se tentarmos aceder a um índice de um certo array que não foi inicializado, este dará um valor sem significado e não dá erro(em Pascal Standard).
 
 
 
@@ -649,14 +612,14 @@ Uma vez que guardámos as nossas strings na **struct heap**, para conseguirmos e
 
 ## Controlo de erros
 
-De forma a evitar erros desnecessários de compilação, fazemos algum controlo de erros nomeadamente no assignment de um valor a uma certa variável, ou seja, verificámos se os tipos entre o valor a associar e o valor da variável são iguais, caso não sejam, irá ser lançado um TypeError pelo YACC.
+De forma a evitar erros desnecessários de compilação, fazemos algum controlo de erros nomeadamente no assignment de um valor a uma certa variável, ou seja, verificámos se os tipos entre o valor a associar e o valor da variável são iguais, caso não sejam, irá ser lançado um TypeError pelo YACC. (Mais exemplos em "erros.pas")
 
 ## Read
 
-De forma a tornar os programas mais legíveis na VM, decídimos que nas operações de read do Pascal, irá surgir uma instrução no final de ler que escreve no ecrã o texto que acabou ler. Este mudança foi apenas para facilitar a compreensão e fluxo do programa na VM.
+De forma a tornar os programas mais legíveis na VM, decídimos que nas operações de read do Pascal, irá surgir uma instrução no final de ler que escreve no ecrã o texto que acabou de ser lido. Este mudança foi apenas para facilitar a compreensão e fluxo do programa na VM e, ao mesmo tempo, refletir de forma fiel o comportamento de programas Pascal.
 
-## Testes extras
-Uma vez que implementámos certas funcionalidades que não estavam presentes nos testes fornecidos pela equipa docente, decídimos criar um ficheiro (**0.Funcionalidades_extra.pas**) que as ilustra. Dentro das novas funcionalidades podemos destacar a escrita no ecrã de elementos de um array de um certo índice de uma string.
+## Testes extra
+Uma vez que implementámos certas funcionalidades que não estavam presentes nos testes fornecidos pela equipa docente, decídimos criar um ficheiro (**0.Funcionalidades_extra.pas**) que as ilustra. Dentro das novas funcionalidades podemos destacar a escrita no ecrã de elementos de um array ou de um certo índice de uma string.
 
 
 
@@ -665,15 +628,15 @@ Uma vez que implementámos certas funcionalidades que não estavam presentes nos
 
 
 
-O programa pode ser executado sem argumentos e, assim, traduz os programas na pasta "programas_pascal" exceto o programa numero 7, nesse e necessária a tradução de functions e não implementamos essa funcionalidade como mencionado previamente. 
+O programa pode ser executado sem argumentos e, assim, traduz os programas na pasta "programas_pascal" exceto o programa número 7, nesse e necessária a tradução de functions e não implementamos essa funcionalidade como mencionado previamente. 
 
 
 
-Depois da execução a pasta "programas_gerados" contem o código pronto para ser testado na máquina virtual que reflete o comportamento do original. 
+Depois da execução a pasta "**programas_gerados**" contem o código pronto para ser testado na máquina virtual que reflete o comportamento do original. 
 
 
 
-Também e possível executar com 1 argumento que será o nome de um ficheiro na pasta do projeto ("PL_Grupo5") e deve terminar em ".pas". A tradução será guardada em "programas_gerados" com o mesmo nome do ficheiro original.
+Também é possível executar com 1 argumento que será o nome de um ficheiro na pasta do projeto ("PL_Grupo5") e deve terminar em ".pas" (p.e. erros.pas). A tradução será guardada em "**programas_gerados**" com nome idêntico ao do ficheiro original.
 
 
 
@@ -684,10 +647,11 @@ Também e possível executar com 1 argumento que será o nome de um ficheiro na 
 
 Em suma, o desenvolvimento deste compilador permitiu-nos consolidar conhecimentos sobre análise léxica, sintática e geração de código para a máquina virtual. 
 
-Apesar dos desafios encontrados, especialmente na resolução de conflitos sintáticos e na gestão de estruturas como arrays e strings, conseguimos implementar uma solução funcional para a maioria dos programas de teste fornecidos pela equipa docente, havendo ainda outros tipos de funcionalidades que implementámos e não estavam nesses testes.
+Apesar dos desafios encontrados, especialmente na resolução de conflitos sintáticos e na gestão de estruturas como arrays e strings, conseguimos implementar uma solução funcional para a maioria dos programas de teste fornecidos pela equipa docente, havendo ainda outros tipos de funcionalidades que implementámos e não estavam nesses testes. A curva de aprendizagem inicial da máquina virtual dificultou a tradução de código mas, depois da fase inicial, tornou-se relativamente intuitiva e gratificante compreender o código minimalista sob o qual depende.
 
 No geral, consideramos que os objetivos propostos foram atingidos e que o trabalho realizado contribuiu para uma melhor compreensão dos conceitos fundamentais do processamento de linguagens.
 
+Para melhoria futura poderiamos realizar melhor otimização do código traduzido, uma vez que não demos muito destaque a essa característica da tradução; focamo-nos apenas em garantir a funcionalidade. 
 
 
 ---

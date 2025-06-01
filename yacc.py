@@ -14,8 +14,7 @@ numero_ciclos_if = 0 ## numero de ciclos ifs
 numero_ciclos_for = 0 ## numero de ciclos fors 
 numero_ciclos_while = 0 ## numero de ciclos whiles
 index_variavel_ciclo_for = {} ## profundidade da variavel do ciclo for
-tipo_ciclo_for = {} ## tipo de ciclo (downto ou to  )
-## index = valor na maquina virtual 
+tipo_ciclo_for = {} ## tipo de ciclo (downto ou to )
  
 
 
@@ -147,7 +146,10 @@ def p_array_types(p):
 ############################## programa ##########################################
 def p_code(p):
     'code : BEGIN expressions END_DOT'
-    p[0] = ["START\n"] + p[2] + ["STOP\n"]
+    if p[2] is not None:
+        p[0] = ["START\n"] + p[2] + ["STOP\n"]
+    else:
+        p[0] = ["START\n", "STOP\n"]
     print(f"Code parsed \n")
 
 def p_dotless_code(p):
@@ -1100,7 +1102,7 @@ if len(sys.argv) == 1:  # Nenhum argumento fornecido
     for file_name in os.listdir(folder_path):
         if ficheiro < limite_ficheiros:
             if file_name.endswith('.pas'):
-                with open(os.path.join(folder_path, file_name), 'r') as file:
+                with open(os.path.join(folder_path, file_name), 'r', encoding='utf-8') as file:
                     reset_variaveis()  # Para garantir que cada ficheiro tem o seu próprio dicionário de variáveis
                     data = file.read()
                     val = parser.parse(data)
@@ -1113,7 +1115,7 @@ elif len(sys.argv) == 2:  # Um argumento fornecido (caminho do arquivo)
     file_path = sys.argv[1]
     if file_path.endswith('.pas'):
         try:
-            with open(file_path, 'r') as file:
+            with open(file_path, 'r', encoding='utf-8') as file:
                 reset_variaveis()
                 data = file.read()
                 val = parser.parse(data)
