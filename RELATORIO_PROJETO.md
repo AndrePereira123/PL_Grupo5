@@ -651,11 +651,17 @@ Uma vez que guardámos as nossas strings na **struct heap**, para conseguirmos e
 
 De forma a evitar erros desnecessários de compilação, fazemos algum controlo de erros nomeadamente no assignment de um valor a uma certa variável, ou seja, verificámos se os tipos entre o valor a associar e o valor da variável são iguais, caso não sejam, irá ser lançado um TypeError pelo YACC.
 
+## Read
+
+De forma a tornar os programas mais legíveis na VM, decídimos que nas operações de read do Pascal, irá surgir uma instrução no final de ler que escreve no ecrã o texto que acabou ler. Este mudança foi apenas para facilitar a compreensão e fluxo do programa na VM.
+
+## Testes extras
+Uma vez que implementámos certas funcionalidades que não estavam presentes nos testes fornecidos pela equipa docente, decídimos criar um ficheiro (**0.Funcionalidades_extra.pas**) que as ilustra. Dentro das novas funcionalidades podemos destacar a escrita no ecrã de elementos de um array de um certo índice de uma string.
 
 
 
 
-# Utilizaçao
+# Utilização
 
 
 
@@ -671,73 +677,16 @@ Também e possível executar com 1 argumento que será o nome de um ficheiro na 
 
 
 
-
-
 ---
 
-
-
 # Capítulo 6
-
 ## Conclusão
 
+Em suma, o desenvolvimento deste compilador permitiu-nos consolidar conhecimentos sobre análise léxica, sintática e geração de código para a máquina virtual. 
 
+Apesar dos desafios encontrados, especialmente na resolução de conflitos sintáticos e na gestão de estruturas como arrays e strings, conseguimos implementar uma solução funcional para a maioria dos programas de teste fornecidos pela equipa docente, havendo ainda outros tipos de funcionalidades que implementámos e não estavam nesses testes.
 
-### Análise Crítica dos Resultados
-
-
-
-**Pontos Fortes:**
-
-1. **Solução elegante para o dangling else**: A abordagem de gramática estratificada mostrou-se superior às soluções baseadas apenas em precedência
-
-2. **Código assembly otimizado**: Geração eficiente de labels únicos e instruções de salto
-
-3. **Arquitetura extensível**: Design modular permite futuras extensões
-
-
-
-**Limitações Identificadas:**
-
-1. **Subconjunto limitado de Pascal**: Apenas estruturas básicas implementadas
-
-2. **Verificação semântica básica**: Ausência de verificação rigorosa de tipos
-
-3. **Otimizações de código**: Espaço para melhorias na qualidade do assembly gerado
-
-
-
-**Impacto Técnico:**
-
-- Eliminação de 100% dos conflitos de parsing
-
-- Redução significativa da complexidade da gramática
-
-- Manutenção da semântica original da linguagem Pascal
-
-
-
-### Trabalho Futuro
-
-
-
-**Extensões de Curto Prazo:**
-
-1. **Estruturas de dados avançadas**: Implementação de arrays multidimensionais e records
-
-2. **Subprogramas**: Suporte a procedures e functions com parâmetros
-
-3. **Verificação semântica**: Implementação completa de verificação de tipos
-
-
-
-**Extensões de Longo Prazo:**
-
-1. **Otimizações**: Implementação de técnicas de otimização de código
-
-2. **Ambiente de desenvolvimento**: Criação de IDE específico para a linguagem
-
-3. **Máquina virtual**: Desenvolvimento de interpretador para o assembly gerado
+No geral, consideramos que os objetivos propostos foram atingidos e que o trabalho realizado contribuiu para uma melhor compreensão dos conceitos fundamentais do processamento de linguagens.
 
 
 

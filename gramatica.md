@@ -159,33 +159,4 @@ identifier_expression → LBRACKET expression RBRACKET
 empty → ε
 ```
 
-## **Características Especiais da Gramática**
-
-### **1. Solução para Dangling Else**
-- **open_statement**: Statements incompletos que podem causar ambiguidade
-- **closed_statement**: Statements completos e bem definidos
-
-### **2. Precedência de Operadores (da maior para menor)**
-1. **Unário**: `+`, `-`, `NOT`
-2. **Multiplicativo**: `*`, `div`, `mod`, `/`
-3. **Aditivo**: `+`, `-`
-4. **Relacional**: `=`, `<>`, `<`, `>`, `<=`, `>=`
-5. **Lógico AND**: `AND`
-6. **Lógico OR**: `OR`
-
-### **3. Tipos Suportados**
-- **Primitivos**: `integer`, `real`, `boolean`, `string`
-- **Compostos**: `array[min..max] of integer`
-- **Literais**: `números inteiros`, `reais`, `strings`, `true`, `false`
-
-### **4. Estruturas de Controle**
-- **Condicionais**: `if-then`, `if-then-else`
-- **Loops**: `while-do`, `for-to-do`, `for-downto-do`
-- **I/O**: `write()`, `writeln()`, `readln()`
-
-### **5. Operações com Arrays e Strings**
-- **Acesso**: `array[index]`, `string[index]`
-- **Função length**: `length(variable)`
-- **Atribuição**: `variable := value`, `array[index] := value`
-
 Esta gramática implementa uma versão simplificada do Pascal.
