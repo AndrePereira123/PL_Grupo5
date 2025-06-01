@@ -386,8 +386,8 @@ def p_closed_statement(p):
         p[0] = p[2]    
 
 def p_identifier_assign_expression(p):
-    '''identifier_assign_expression : ASSIGN assign_expression  
-                                    | LBRACKET simple_expression RBRACKET ASSIGN assign_expression
+    '''identifier_assign_expression : ASSIGN expression  
+                                    | LBRACKET simple_expression RBRACKET ASSIGN expression
     '''
     if p[1] == ":=":  
         if (p[2][0].lower() == 'string_pure'):            
@@ -657,16 +657,13 @@ def p_readln_statement(p):
 
 
 def p_string_statement(p):
-    '''string_statement : assign_expression
-                        | assign_expression COMMA string_statement'''
+    '''string_statement : expression
+                        | expression COMMA string_statement'''
     if len(p) == 2:
         p[0] = [p[1]]
     else:
         p[0] = [p[1]] + p[3]
 
-def p_assign_expression(p):
-    '''assign_expression : expression ''' 
-    p[0] = p[1]
 
 
 ##################################### expression (aritmetrica e booleana) ##########################################

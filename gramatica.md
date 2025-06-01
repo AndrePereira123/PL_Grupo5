@@ -71,8 +71,8 @@ closed_statement → IDENTIFIER identifier_assign_expression
 
 ### **Atribuições e Condições**
 ```
-identifier_assign_expression → ASSIGN assign_expression
-                             | LBRACKET simple_expression RBRACKET ASSIGN assign_expression
+identifier_assign_expression → ASSIGN expression
+                             | LBRACKET simple_expression RBRACKET ASSIGN expression
 
 for_condition → expression ASSIGN expression to_expression
 
@@ -91,10 +91,8 @@ write_statement → LPAREN string_statement RPAREN
 
 readln_statement → LPAREN string_statement RPAREN
 
-string_statement → assign_expression
-                 | assign_expression COMMA string_statement
-
-assign_expression → expression
+string_statement → expression
+                 | expression COMMA string_statement
 ```
 
 ### **Expressões Booleanas e Aritméticas**

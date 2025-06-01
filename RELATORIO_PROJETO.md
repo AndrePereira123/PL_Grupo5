@@ -390,8 +390,8 @@ Um programa vai ser composto por uma lista de declarações (statements). Inicia
 ### **Atribuições e Condições**
 
 ```
-identifier_assign_expression → ASSIGN assign_expression
-                             | LBRACKET simple_expression RBRACKET ASSIGN assign_expression 
+identifier_assign_expression → ASSIGN expression
+                             | LBRACKET simple_expression RBRACKET ASSIGN expression 
 
 for_condition → expression ASSIGN expression to_expression
 
@@ -408,7 +408,7 @@ if_condition → expression
 
 Nesta secção apresentámos a gramática para as atribuições de valores a variáveis, no caso a produção de **identifier_assign_expression**, que pode ter dois tipos:
 
-- **Atribuir um valor a uma variável**, sendo a primeira produção de **identifier_assign_expression**, onde reconhece em primeiro lugar o símbolo de ASSIGN ':=', e de seguida a **assign_expression**, que é uma expressão que pode ser tanto um valor único, como um conjunto de operações relacionais, aritméticas ou lógicas, dependendo do tipo da variável que estamos a dar assign. É importante mencionar que fizemos uma verificação de tipos na atribuição, ou seja, verificar se as duas expressões são do mesmo tipo;
+- **Atribuir um valor a uma variável**, sendo a primeira produção de **identifier_assign_expression**, onde reconhece em primeiro lugar o símbolo de ASSIGN ':=', e de seguida a **expression**, que é uma expressão que pode ser tanto um valor único, como um conjunto de operações relacionais, aritméticas ou lógicas, dependendo do tipo da variável que estamos a dar assign. É importante mencionar que fizemos uma verificação de tipos na atribuição, ou seja, verificar se as duas expressões são do mesmo tipo;
 
 
 
@@ -443,20 +443,18 @@ Por fim, temos o **code_or_statement**, que define o bloco de "código" do if, f
 ### **I/O Statements**
 
 ```
-
 write_statement → LPAREN string_statement RPAREN
 
 readln_statement → LPAREN string_statement RPAREN
 
-string_statement → assign_expression
-                 | assign_expression COMMA string_statement
+string_statement → expression
+                 | expression COMMA string_statement
 
-assign_expression → expression
 ```
 
 
 
-Nos statemets de input/output temos símbolos não terminais para identificar ações de escrita "write_statement" e leitura "readln_statement", ambas recebem um string_statement que pode ser uma só "assign_expression", ou uma lista com varias separadas por virgulas; nesse caso serão concatenados os resultados (no caso de escrita). Uma assign_expression  MUDAR AQUI PARA EXPRESSION 
+Nos statemets de input/output temos símbolos não terminais para identificar ações de escrita "write_statement" e leitura "readln_statement", ambas recebem um string_statement que pode ser uma só "expression", ou uma lista com varias separadas por virgulas; nesse caso serão concatenados os resultados (no caso de escrita). Uma expression  MUDAR AQUI PARA EXPRESSION 
 
 
 
